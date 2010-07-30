@@ -1,4 +1,4 @@
-[% # $Id: attributefilter_selectmenu.tt,v 1.1 2007-10-01 14:57:00 ds5 Exp $ %]
+[% # $Id: attributefilter_selectmenu.tt,v 1.1 2007/10/01 14:57:00 ds5 Exp $ %]
 
 [% #--------------------------------------------------------------------
    # Macro for rendering a select-menu with filter options. Options can

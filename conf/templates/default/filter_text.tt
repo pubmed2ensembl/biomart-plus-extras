@@ -1,4 +1,4 @@
-[% # $Id: filter_text.tt,v 1.4 2007-01-09 17:16:00 rh4 Exp $ %]
+[% # $Id: filter_text.tt,v 1.4 2007/01/09 17:16:00 rh4 Exp $ %]
 [% #--------------------------------------------------------------------
    # Macro for rendering form element(s) for a simple text filter. The
    # element(s) may be for a single filter, or a list of filters within

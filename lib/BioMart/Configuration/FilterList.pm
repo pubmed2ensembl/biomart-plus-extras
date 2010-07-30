@@ -1,4 +1,4 @@
-# $Id: FilterList.pm,v 1.4.2.3 2009-11-06 01:30:46 syed Exp $
+# $Id: FilterList.pm,v 1.4 2008/04/09 12:52:33 syed Exp $
 #
 # BioMart module for BioMart::Configuration::FilterList
 #
@@ -177,7 +177,7 @@ sub _toSQL {
 
   if (!$sql){#need to generate an IN list
       foreach (@values) {
-	  $_ =~ s/'/''/g if ($_); # subsitituting single ' with two '' to overcome SQL issues on ORACLE, mySQL, PG
+	  $_ =~ s/'/''/ if ($_); # subsitituting single ' with two '' to overcome SQL issues on ORACLE, mySQL, PG
       }
       if ($oracle){
           #will hold stringified sublists
@@ -208,10 +208,8 @@ sub _toSQL {
       }
 
       else{
-	  my %saw;
-
 	  $sql = $filters[$i]->attribute->toSQL." IN('";
-	  $sql .= join("','", grep(!$saw{$_}++, @values)) if (@values > 0);
+	  $sql .= join("','", grep { $_ } @values) if (@values > 0);
 	  $sql .= "')";
       }
   }

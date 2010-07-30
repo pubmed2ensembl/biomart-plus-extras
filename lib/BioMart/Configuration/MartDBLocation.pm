@@ -90,8 +90,8 @@ sub getDatasetConfigXML{
 	}
 	
     # stops AE XML too long bug
-    $dbh->{'LongTruncOk'} = 0;
-    $dbh->{'LongReadLen'} = 5000000;
+    $dbh->{'LongTruncOk'} = 1;
+    $dbh->{'LongReadLen'} = 20000;
     
     my $upperName = uc($dataSetName);
 

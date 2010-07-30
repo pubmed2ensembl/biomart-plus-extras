@@ -23,7 +23,8 @@
 	
 	<!-- GAP betweeb buttonsBar and panels below-->	
 	<tr>
-		<td width="100%" height="1%" align="left">			
+		<!-- <td width="100%" height="1%" align="left">			-->
+		<td>
 		</td>
 	</tr>
 	
@@ -31,7 +32,7 @@
 	<tr>
 	
 	<td width="100%" height="94%" align="left">
-	<div style="width:100%; height:100%; overflow:hidden; align:top; background: white; position: relative;">
+	<div style="width:100%; height:100%; overflow:hidden; align:top; background-color: #E5E5E5; position: relative;">
 		<table width="100%" height="100%"  border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed;">
 		<tr>
 		<td class="mart_tableSummaryPanel" height="100%" width="25%" align="left" valign="top">
@@ -60,7 +61,8 @@
 			</div>
 		</td>
 	
-	<td class="mart_tableMainPanel" height="100%" width="85%" valign="top" align="left">
+	<!-- Set width in the following line to alter the width of the dataset/filters/attributes panel to the left. -->
+	<td class="mart_tableMainPanel" height="100%" width="75%" valign="top" align="left">
 
 					
 			<input type="hidden" name="menuNumber" value="0" />

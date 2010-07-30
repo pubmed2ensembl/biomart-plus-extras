@@ -1,4 +1,4 @@
-[% # $Id: collapsible_section.tt,v 1.6 2007-05-23 16:25:14 syed Exp $ %]
+[% # $Id: collapsible_section.tt,v 1.6 2007/05/23 16:25:14 syed Exp $ %]
 [% #--------------------------------------------------------------------
    # FOR ALL SECTIONS EXCEPT SUMMARY PANEL
    # Macro for rendering controls + start-tag for collapsible sections.

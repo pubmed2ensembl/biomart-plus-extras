@@ -1,4 +1,4 @@
-#$Id: GenomicSequence.pm,v 1.21.2.2 2009-11-06 00:44:03 syed Exp $
+#$Id: GenomicSequence.pm,v 1.21.2.1 2008/08/13 12:59:45 syed Exp $
 #
 # BioMart module for BioMart::Dataset::GenomicSequence
 #
@@ -1575,6 +1575,7 @@ sub _snpSequences {
     my ($self, $atable, $curRow) = @_;
   
     my $rank = 1;
+
     if ($curRow) {
 	#since locations are just hashes, hack them
 	my $location = $self->_getLocationFrom($curRow, "chr", "pos", 
@@ -1590,7 +1591,6 @@ sub _snpSequences {
 	    $location->{"off"} = $self->get('upstream_flank');
 	} 
 	else {
-
 	    $location->{"start"} = $location->{"pos"} - 
 		$self->get('upstream_flank');
 	    $location->{"end"} = $location->{"pos"} + 
@@ -1603,25 +1603,16 @@ sub _snpSequences {
 	    }
 	}
 
-
 	my $locations = {};
 	$locations->{$rank} = $location;
 	my $sequence = $self->_processSequence($locations);
 	$self->_editSequence(\$sequence);
 	if ($sequence) {
-	    #indels, insertions really. special case of allele of type hyphen/bp e.g -/A 
-	    if ($location->{"allele"} =~ m/-\//){
-	    	chop($sequence);
-	    	substr($sequence, $location->{"off"}, 0) = "%".$location->{"allele"}."%";
-	    }
-	    else{
-	    	substr($sequence, $location->{"off"}, 1) = "%".$location->{"allele"}."%";
-	    }
+	    substr($sequence, $location->{"off"}, 1) = "%".$location->{"allele"}."%";
 	    $self->_addRow($atable, $self->_initializeReturnRow($curRow), 
 			   $sequence);
 	}    
     }
-
 }
 
 =head2 toString

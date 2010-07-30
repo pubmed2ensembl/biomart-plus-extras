@@ -1,4 +1,4 @@
-# $Id: ValueFilter.pm,v 1.3.2.2 2009-11-06 01:30:46 syed Exp $
+# $Id: ValueFilter.pm,v 1.3 2008/04/09 12:52:33 syed Exp $
 #
 # BioMart module for BioMart::Configuration::ValueFilter
 #
@@ -125,7 +125,7 @@ sub _toSQL {
       next unless (defined($$row[0]));#avoid NULL entries
       
 	 $temp = $$row[0];
-	 $temp =~ s/'/''/g; # substitute a ' with '' so it works on all platforms PG, ORACLE, MYSQL
+	 $temp =~ s/'/''/; # substitute a ' with '' so it works on all platforms PG, ORACLE, MYSQL
 
 	 if ($operation eq '='){
 	  #push @values, $$row[0];
@@ -162,9 +162,8 @@ sub _toSQL {
 					      @in_lists );
 	   }
 	   else{
-	       my %saw;
 	       $sql = $attribute->toSQL." IN('";
-	       $sql .= join("','", grep(!$saw{$_}++, @values)) if (@values > 0);
+	       $sql .= join("','", grep { $_ } @values);
 	       $sql .= "')";
 	   }
        }

@@ -132,8 +132,7 @@ eval{
 			print $CGI->header(	-'type' =>'text/xml',
 								-'X-DAS-Version' => 'DAS/1.5',
 								-'X-DAS-Status'  => '200',
-								-'X-DAS-Capabilities' => 'dsn/1.0; features/1.0;',
-								-'charset' => 'utf-8');
+								-'X-DAS-Capabilities' => 'dsn/1.0; features/1.0;');
 			print $results;
 		}
 		else {
@@ -267,12 +266,12 @@ sub get_geneAnnotation
 		$results .= &feature_open($portions[1], $portions[1]);
 		#$results .= &type($portions[1],"no","no","no", $portions[1]);
 		$results .= &type($dsDisplayName,"no","no","no", $dsDisplayName);
-		$results .= &method("methodID:unknown", "");
-		$results .= &start("0");
-		$results .= &end("0");
-		$results .= &score("-");
-		$results .= &orientation("0");
-		$results .= &phase("-");
+		#$results .= &method("methodID:unknown", "");
+		#$results .= &start("0");
+		#$results .= &end("0");
+		#$results .= &score("-");
+		#$results .= &orientation("0");
+		#$results .= &phase("-");
 		$results .= &note($portions[2]);
 
 		$hrefURL = sprintf ($linkURL, defined ($linkURL) ? $portions[1] : '');
@@ -383,13 +382,13 @@ sub get_chromosomeAnnotationFeatures
 		$results .= &feature_open($portions[0], $portions[0]);
 		#$results .= &type($portions[1],"no","no","no", $portions[1]);
 		$results .= &type($dsDisplayName,"no","no","no", $dsDisplayName);
-		$results .= &method("methodID:unknown", "");
+		#$results .= &method("methodID:unknown", "");
 		$results .= &start($portions[1]);
 		$results .= &end($portions[2]);
-		$results .= &score("-");
+		#$results .= &score("-");
 		$results .= &orientation($portions[3]);
-		$results .= &phase("-");
-		$results .= &note("");
+		#$results .= &phase("-");
+		#$results .= &note($portions[0]);
 		
 		$hrefURL = sprintf ($linkURL, defined ($linkURL) ? $portions[0] : '');
 		$results .= &link($hrefURL, $portions[0])  if($hrefURL);
@@ -423,9 +422,12 @@ sub get_chromosomeAnnotationGTE
 {
 	my ($registry, $schemaName, $dasDatasetName, $dasDSNName, $coordinates_string, $exp_name) = @_;
 	my $resultsHash;
+	my $sugarHash;
 	my $results;
 	my $temp_results;
+	my $sugar_results;
 	my @resultRows;
+	my @sugarRows;
 	my $counter = 0;
 	my ($chromosome, $start, $end);
 	
@@ -468,6 +470,7 @@ sub get_chromosomeAnnotationGTE
 			}
 		}
 	}
+
 	open(my $result_buffer, '>', \$temp_results);
 
 	my $query_runner = BioMart::QueryRunner->new();
@@ -478,27 +481,85 @@ sub get_chromosomeAnnotationGTE
 	#$query_runner->printFooter();		
 	close($result_buffer);
 
+	# add some sugar...
+	open($result_buffer, '>', \$sugar_results);
+
+	$query = BioMart::Query->new('registry'=>$registry,'virtualSchemaName'=>$schemaName);
+	$query->setDataset($dasDatasetName);
+	$query->addAttribute("ensembl_gene_id");
+	$query->addAttribute("external_gene_id");
+	$query_runner = BioMart::QueryRunner->new();
+	$query_runner->uniqueRowsOnly(1);
+	$query_runner->execute($query);
+	$query_runner->printResults($result_buffer);
+	close($result_buffer);
+
+	@sugarRows = split(/\n/, $sugar_results);
+	foreach my $line (@sugarRows) {
+		my @portions = split(/\t/, $line);
+
+		# maps Ensembl Gene IDs to their associated gene name
+		$sugarHash->{$portions[0]} = $portions[1];
+	}
 
 	# establish a multi-dimensional hash to store all the structure table information for xml transformation
+	my $xtraColumns = 0;
 	@resultRows = split(/\n/, $temp_results);
 	foreach my $line (@resultRows) {
 		no warnings 'uninitialized';
 		my @portions = split (/\t/, $line);
 		
+		if ($xtraColumns <= 0) {
+			$xtraColumns = $#portions - 2;
+		}
+
 		$resultsHash->{$portions[0]}->{'start'} = $portions[1];
 		$resultsHash->{$portions[0]}->{'end'} = $portions[2];
 		$resultsHash->{$portions[0]}->{'strand'} = $portions[3];
 
-		$resultsHash->{$portions[0]}->{'transcript'}->{$portions[4]}->{'start'} = $portions[5];
-		$resultsHash->{$portions[0]}->{'transcript'}->{$portions[4]}->{'end'} = $portions[6];
-		$resultsHash->{$portions[0]}->{'transcript'}->{$portions[4]}->{'strand'} = $portions[3];
+		# accumulate data that might be associated with the gene
+		$resultsHash->{$portions[0]}->{'name'} = $sugarHash->{$portions[0]};
 
-		$resultsHash->{$portions[0]}->{'transcript'}->{$portions[4]}->{'exon'}->{$portions[7]}->{'start'} = $portions[8];
-		$resultsHash->{$portions[0]}->{'transcript'}->{$portions[4]}->{'exon'}->{$portions[7]}->{'end'} = $portions[9];
-		$resultsHash->{$portions[0]}->{'transcript'}->{$portions[4]}->{'exon'}->{$portions[7]}->{'strand'} = $portions[3];
+		for (my $i = 4; $i <= $#portions; $i++) {
+
+			my $j = $i - 4;
+
+			if (index($resultsHash->{$portions[0]}->{'xtra'}, "($j:$portions[$i])") == -1) {
+				$resultsHash->{$portions[0]}->{'xtra'} .= "($j:$portions[$i])";
+
+				if ($resultsHash->{$portions[0]}->{'xtraColumn'}->{$j}) {
+					$resultsHash->{$portions[0]}->{'xtraColumn'}->{$j} = $resultsHash->{$portions[0]}->{'xtraColumn'}->{$j} + 1;
+				} else {
+					$portions[$i] =~ s/^\s+|\s+$//g;
+					if ($portions[$i] =~ /\w*\d+/) {
+						$resultsHash->{$portions[0]}->{'xtraColumn'}->{$j} = $portions[$i];
+					} else {
+						$resultsHash->{$portions[0]}->{'xtraColumn'}->{$j} = 0;
+					}
+				}
+
+				if ($resultsHash->{$portions[0]}->{'xtraTotal'}) {
+					$resultsHash->{$portions[0]}->{'xtraTotal'} = $resultsHash->{$portions[0]}->{'xtraTotal'} + $portions[$i];
+				} else {
+					$resultsHash->{$portions[0]}->{'xtraTotal'} = $portions[$i];
+				}
+
+			}
+
+		}
+
+#		if ($#portions >= 6) {
+#			$resultsHash->{$portions[0]}->{'transcript'}->{$portions[4]}->{'start'} = $portions[5];
+#			$resultsHash->{$portions[0]}->{'transcript'}->{$portions[4]}->{'end'} = $portions[6];
+#			$resultsHash->{$portions[0]}->{'transcript'}->{$portions[4]}->{'strand'} = $portions[3];
+#		}
+
+#		if ($#portions >= 9) {
+#			$resultsHash->{$portions[0]}->{'transcript'}->{$portions[4]}->{'exon'}->{$portions[7]}->{'start'} = $portions[8];
+#			$resultsHash->{$portions[0]}->{'transcript'}->{$portions[4]}->{'exon'}->{$portions[7]}->{'end'} = $portions[9];
+#			$resultsHash->{$portions[0]}->{'transcript'}->{$portions[4]}->{'exon'}->{$portions[7]}->{'strand'} = $portions[3];
+#		}
 	}
-	
-	#print Dumper($resultsHash);	
 	
 	####  represent $resultsHash in terms of DAS XML
 		
@@ -509,21 +570,77 @@ sub get_chromosomeAnnotationGTE
 	################################### ADDING GENE FEATURES
 	foreach my $geneID (keys %{$resultsHash}) {
 	
-		$results .= &feature_open($geneID, $geneID);
-		$results .= &type("gene","no","no","no", "gene");
-		$results .= &method("methodID:unknown", "");
-		$results .= &start($resultsHash->{$geneID}->{'start'});
-		$results .= &end($resultsHash->{$geneID}->{'end'});
-		$results .= &score("-");
+		if ($resultsHash->{$geneID}->{'xtra'} ne "") {
+			# display accumulated data
+			my @xtras = split (',',$resultsHash->{$geneID}->{'xtra'});
+			my @dsnParts = split('__', $dasDSNName);
+			my $geneName = $resultsHash->{$geneID}->{'name'};
+
+			# If we do not know a gene's name, then revert back to its ID.
+			if ($geneName eq "") {
+				$geneName = $geneID;
+			}
+
+			$results .= &feature_open($geneID, "$geneName (".$resultsHash->{$geneID}->{'xtraTotal'}." refs)");
+			for (my $i = 0; $i < $xtraColumns; $i++) {
+				if ($i == 0) {
+					$results .= &note("Entrez: ".$resultsHash->{$geneID}->{'xtraColumn'}->{$i}." PubMed IDs");
+				} elsif ($i == 1) {
+					$results .= &note("MEDLINE: ".$resultsHash->{$geneID}->{'xtraColumn'}->{$i}." PubMed IDs");
+				} elsif ($i == 2) {
+					$results .= &note("PMC: ".$resultsHash->{$geneID}->{'xtraColumn'}->{$i}." PubMed IDs");
+				} elsif ($i == 3) {
+                                        $results .= &note("EMBL BLAST: ".$resultsHash->{$geneID}->{'xtraColumn'}->{$i}." PubMed IDs");
+                                } elsif ($i == 4) {
+                                        $results .= &note("EMBL XREF: ".$resultsHash->{$geneID}->{'xtraColumn'}->{$i}." PubMed IDs");
+                                } elsif ($i == 5) {
+                                        $results .= &note("text2genome: ".$resultsHash->{$geneID}->{'xtraColumn'}->{$i}." PubMed IDs");
+                                } else {
+					$results .= &note("Other: ".$resultsHash->{$geneID}->{'xtraColumn'}->{$i}." PubMed IDs");
+				}
+			}
+			#$results .= &note($resultsHash->{$geneID}->{'xtra'});
+			$results .= &link("http://$server_host:$server_port/biomart/martview?VIRTUALSCHEMANAME=default&amp;ATTRIBUTES=$dsnParts[1].default.feature_page.ensembl_gene_id|$dsnParts[1].default.feature_page.external_gene_id|$dsnParts[1].default.feature_page.pmid_1093|$dsnParts[1].default.feature_page.pmid_1095|$dsnParts[1].default.feature_page.pmid_1099|$dsnParts[1].default.feature_page.pmid_1089|$dsnParts[1].default.feature_page.pmid_1091|$dsnParts[1].default.feature_page.pmid_10102&amp;FILTERS=$dsnParts[1].default.filters.ensembl_gene_id.$geneID&amp;VISIBLEPANEL=resultspanel", "View results in pubmed2ensembl.");
+
+			$results .= &type("gene","no","no","no", "publication");
+			#$results .= &method("methodID:unknown", "");
+			$results .= &start($resultsHash->{$geneID}->{'start'});
+			$results .= &end($resultsHash->{$geneID}->{'end'});
+			#$results .= &score("-");
+
+			$results .= &orientation("+")
+				if ($resultsHash->{$geneID}->{'strand'} == 1) ;
+			$results .= &orientation("-")
+				if ($resultsHash->{$geneID}->{'strand'} == -1) ;
+
+			#$results .= &phase("-");
+
+			$results .= &feature_close();
+		} else {
+			# In pubmed2ensembl, we disable the normal gene display.
+
+			# normal gene display
+			#$results .= &feature_open($geneID, $geneID);
+
+			#$results .= &type("gene","no","no","no", "gene");
+			#$results .= &method("methodID:unknown", "");
+			#$results .= &start($resultsHash->{$geneID}->{'start'});
+			#$results .= &end($resultsHash->{$geneID}->{'end'});
+			#$results .= &score("-");
 			
-		$results .= &orientation("+") 
-			if ($resultsHash->{$geneID}->{'strand'} == 1) ;
-		$results .= &orientation("-") 
-			if ($resultsHash->{$geneID}->{'strand'} == -1) ;
+			#$results .= &orientation("+") 
+			#	if ($resultsHash->{$geneID}->{'strand'} == 1) ;
+			#$results .= &orientation("-") 
+			#	if ($resultsHash->{$geneID}->{'strand'} == -1) ;
 			
-		$results .= &phase("-");
-		$results .= &feature_close();
+			#$results .= &phase("-");
+
+			#$results .= &feature_close();
+		}
 	}
+
+	# In pubmed2ensembl, we disable the following displays.
+	if (0) {
 
 	################################### ADDING TRANSCRIPT FEATURES
 	foreach my $geneID (keys %{$resultsHash}) {
@@ -575,7 +692,7 @@ sub get_chromosomeAnnotationGTE
 			}
 		}
 	}
-	
+	}
 	
 	###############################################################
 	$results .= &segment_close();

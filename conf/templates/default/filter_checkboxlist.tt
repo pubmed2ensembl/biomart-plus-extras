@@ -1,4 +1,4 @@
-[% # $Id: filter_checkboxlist.tt,v 1.2 2006-11-24 10:28:41 syed Exp $ %]
+[% # $Id: filter_checkboxlist.tt,v 1.2 2006/11/24 10:28:41 syed Exp $ %]
 
 [% #--------------------------------------------------------------------
    # Macro for rendering a list of checkboxes as filter options. Options 

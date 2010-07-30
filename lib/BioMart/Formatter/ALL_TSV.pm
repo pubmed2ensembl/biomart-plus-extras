@@ -1,4 +1,4 @@
-# $Id: ALL_TSV.pm,v 1.2 2007-10-02 11:43:32 ds5 Exp $
+# $Id: ALL_TSV.pm,v 1.2 2007/10/02 11:43:32 ds5 Exp $
 #
 # BioMart module for BioMart::Formatter::ALL_TSV
 #

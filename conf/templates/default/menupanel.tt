@@ -7,16 +7,16 @@
 
 	<table class ="mart_main_menubar" width="100%" height="100%"  border="0" cellpadding="0" cellspacing="0">
 		<tr>
-		<td height="100%"  align="left" valign="top" >
+		<td height="100%"  align="left" valign="middle" style="width: 23%;"> <!-- width was 70% -->
 					     
 			<!--
 			<img src="/martview/images/biomart-logo.gif" alt="" style="float: right; margin: 6px 4px 0px 0px"/></a> 				 
 			-->
 	
-		
+<table style="background-color: #BBBBBB; border-style:solid; border-width: 1px; padding: 7px 8px 7px 8px; margin-left: 10px;"><tr><td align="left" style="padding: 4px 4px">
 			<!--input type="submit" value="New" style="margin: 0px 0px 0px 6px" name="submit.newsession"--> 
 			<a id="new_button_tag"
-				style="margin-left:6px; 
+				style="margin-left:0px;
         		"
 				class="mart_btn_new"
 	   			onmouseover="this.className='mart_btn_new mart_btnhov'" 
@@ -34,11 +34,12 @@
 	  			" 
 	  			title="Start a new query">New
 	  		</a>
-	
+
+</td></tr><tr><td><hr size="1" width="100%"></td></tr><tr><td align="left" style="padding: 4px 4px">
 	
 			<!--input type="button" value="Count" name="get_count_button" -->
 			<a id="count_button_tag"
-				style="margin-left:4px;
+				style="margin-left:0px;
 				"
 				class="mart_btn_count"
 				onmouseover="this.className='mart_btn_count mart_btnhov'" 
@@ -74,7 +75,7 @@
 	
 			<!--input type="button" value="Results" name="get_results_button" -->
 			<a id="results_button_tag"
-				style="margin-left:4px;
+				style="margin-left:8px;
 				"
 				class="mart_btn_results"
 				onmouseover="this.className='mart_btn_results mart_btnhov';" 
@@ -107,6 +108,8 @@
 					document.mainform['summarypanel__current_highlighted_branch'].value = 'show_results'; 
 
 					document.mainform.resultsButton.value = 5;
+
+					document.getElementById('esearchField').value = '';
 		
 					document.mainform.target = 'results_hiddenIFrame';
 					document.mainform.submit();
@@ -117,12 +120,125 @@
 				}
 				" title="Preview the results of the query">Results
 			</a>
-	
+			&thinsp; <!-- Safari/Google Chrome rendering issue of a button. -->
+</td></tr></table>			
+			<!-- Joachim -->
 		</td>
-		<td height="100%" align="right" valign="top" >
+		<td height="100%" align="center" valign="middle" width="53%">
+<table style="background-color: #BBBBBB; border-style:solid; border-width: 1px; padding: 2px 15px 2px 15px;">
+<tr><td colspan="2" align="left">
+				<i style="font-size: 8pt;">Terms for NCBI&#146;s <b style="font-size: 8pt;">esearch</b>:</i>
+				<img src="/martview/images/help.png"
+					onmouseover="Tip('<b>Example 1:</b> <i>methylation dna histone</i><br />Searches for publications in which all of the terms &quot;methylation&quot;, &quot;dna&quot; and &quot;histone&quot; occur. Equivalent search query: <i>methylation AND dna AND histone</i><br /><br /><b>Example 2:</b> <i>methylation dna OR histone</i><br />Searches for &quot;methylation&quot; and &quot;dna&quot;, or alternatively, for the term &quot;histone&quot;. Publications will be returned in which either &quot;methylation&quot;/&quot;dna&quot;, &quot;histone&quot;, or both appear.<br /><br /><b>Example 3:</b> <i>methylation AND ( dna OR histone )</i><br />Searches for the terms &quot;dna&quot; or &quot;histone&quot;, and then intersects the search result with the search result for the term &quot;methylation&quot;. Equivalent search query: <i>methylation ( dna OR histone )</i><br /><br /><b>NOTE:</b> Brackets, i.e. <i>(</i> and <i>)</i>, need to be surrounded by a space in order to group search queries.', OPACITY, 92, WIDTH, -400, TITLE, 'Advanced Queries', TITLEBGCOLOR, '#F85A10', BGCOLOR, '#cccccc', BORDERCOLOR, '#333333')"
+					onmouseout="UnTip()" />
+</td></tr>
+<tr><td colspan="2" align="left" style="padding: 0px px 10px 0px;">
+				<input id="esearchField" name="esearchField" type="text" size="55" style="margin-right: 0px;" onkeypress="return event.keyCode != 13;" />
+                       <a id="search_button_tag"
+                                style="margin-left: 8px;"
+                                class="mart_btn_search"
+                                onmouseover="this.className='mart_btn_search mart_btnhov';"
+                                onmouseout="this.className='mart_btn_search';"
+                                onclick="
+                                if (document.getElementById('esearchField').value == '') {
+                                        alert('Please enter a search phrase first.');
 
+                                        return true;
+                                }
+                                if (datasetExists() > 0) {
+                                        [% dataset_name = session.param('dataset').first %]
+
+					var esearchColumn = document.getElementById(document.getElementById('esearchDB').value).value;
+					document.getElementById('idTag__${dataset_name}__filtercollection.id_list_limit').value = esearchColumn;
+					addOnceTouchedParam('${dataset_name}__filter.id_list_limit_filters__onceTouched');
+					updateMenuPushactions(document.getElementById('idTag__${dataset_name}__filtercollection.id_list_limit'), ${dataset_name}__pushActionsOfFiltermenu, ${dataset_name}__sessionValueOfFiltermenu);
+					for(var i=0; i<document.getElementById('idTag__${dataset_name}__filtercollection.id_list_limit').options.length; i++) {
+						removeFromSummaryPanelList('${dataset_name}__filterlist', '${dataset_name}__filter.'+document.getElementById('idTag__${dataset_name}__filtercollection.id_list_limit').options[i].value);
+					};
+
+                                        checkFilterCollectionCheckbox('${dataset_name}__filtercollection.id_list_limit');
+
+                                        document.getElementById('resultsTableId').innerHTML = 'Loading... ';
+                                        addLoadingImage('resultsTableId', '[% TAG_path %]');
+                                        document.mainform.formatterMenu.value = 'preView';
+                                        document.mainform.do_export.value = 0;
+                                        document.mainform.savequery.value = 0;
+                                        document.mainform.showquery.value = 0;
+
+                                        var summaryCountElt1 = document.getElementById('summarypanel_filter_count_1');
+                                        if (summaryCountElt1)   {
+                                                document.mainform.summarypanel_filter_count_1_hidden.value = summaryCountElt1.innerHTML;
+                                        }
+                                        var summaryCountElt2 = document.getElementById('summarypanel_filter_count_2');
+                                        if (summaryCountElt2)   {
+                                                document.mainform.summarypanel_filter_count_2_hidden.value = summaryCountElt2.innerHTML;
+                                        }
+
+                                        showPanelHideSiblings('resultspanel');
+                                        setHighlightedSummaryPanelBranch('show_results');
+
+                                        document.mainform.track_visible_section.value = document.mainform['mart_mainpanel__current_visible_section'].value;
+
+                                        document.mainform['mart_mainpanel__current_visible_section'].value = 'resultspanel';
+                                        document.mainform['summarypanel__current_highlighted_branch'].value = 'show_results';
+
+                                        document.mainform.resultsButton.value = 5;
+
+                                        document.mainform.target = 'results_hiddenIFrame';
+                                        document.mainform.submit();
+
+                                        document.mainform.resultsButton.value = 1;
+
+                                        return false;
+                                }
+                                " title="Preview the results of the search query">Search
+                        </a>&nbsp;
+</td></tr>
+<tr><td>
+                                <select id="esearchDB" name="esearchDB" onchange="
+					if (this.value == 'esearchPubMedTable') {
+						document.getElementById('esearchPubMedTable').disabled = false;
+						document.getElementById('esearchPMCTable').disabled = true;
+					} else {
+						document.getElementById('esearchPubMedTable').disabled = true;
+						document.getElementById('esearchPMCTable').disabled = false;
+					}
+					">
+                                        <option value="esearchPubMedTable">search for PubMed IDs</option>
+                                        <option value="esearchPMCTable">search for PubMed Central IDs</option>
+                                </select>
+</td><td>
+				<select id="esearchRetMax" name="esearchRetMax">
+					<option value="10">retrieve up to 10 document IDs</option>
+					<option value="20">retrieve up to 20 document IDs</option>
+					<option value="50">retrieve up to 50 document IDs</option>
+					<option value="100">retrieve up to 100 document IDs</option>
+					<option value="1000">retrieve up to 1000 document IDs</option>
+					<option selected value="10000">retrieve up to 10000 document IDs</option>
+					<option value="100000">retrieve up to 100000 document IDs</option>
+				</select>
+</td></tr>
+<tr><td>
+                                <select id="esearchPubMedTable" name="esearchPubMedTable">
+                                        <option value="pmid_1093">filter on Entrez: PubMed ID</option>
+                                        <option selected value="pmid_1095">filter on MEDLINE: PubMed ID</option>
+					<option value="pmid_1099">filter on PMC: PubMed ID</option>
+					<option value="pmid_1089">filter on EMBL: BLAST PubMed ID</option>
+                                        <option value="pmid_1091">filter on EMBL: XREF PubMed ID</option>
+                                        <option value="pmid_10102">filter on text2genome: PubMed ID</option>
+                                </select>
+</td><td>
+                                <select disabled id="esearchPMCTable" name="esearchPMCTable">
+                                        <option value="pmcid_1099">filter on PMC: PubMed Central ID</option>
+                                        <option value="pmcid_10102">filter on text2genome: PubMed Central ID</option>
+                                </select>
+</td></tr></table>
+		</td>
+		<td height="100%" align="right" valign="middle" >
+
+<table style="background-color: #BBBBBB; border-style:solid; border-width: 1px; padding: 6px 0px 6px 0px; margin-right: 10px;"><tr><td align="center" style="padding: 5px 10px;">
 			<a id="url_button_tag"
-				style="margin-right:4px;
+				style="margin-right:24px;
 				"
 				class="mart_btn_url"
    			onmouseover="this.className='mart_btn_url mart_btnhov'" 
@@ -139,7 +255,7 @@
 			</a>
 		
 			<a id="xml_button_tag"
-				style="margin-right:4px;
+				style="margin-right:0px;
 				"
 				class="mart_btn_xml"
    			onmouseover="this.className='mart_btn_xml mart_btnhov'" 
@@ -154,9 +270,12 @@
 				}
 				" title ="Show query in XML Web Service Format">XML
 			</a>
+			&thinsp; <!-- Safari/Google Chrome rendering issue of a button. -->
+
+</td></tr><tr><td align="center" style="padding: 7px 10px;">
 
 			<a id="perl_button_tag"
-				style="margin-right:4px;
+				style="margin-right:25px;
 				"
 				class="mart_btn_perl"
    			onmouseover="this.className='mart_btn_perl mart_btnhov'" 
@@ -173,7 +292,7 @@
 			</a>
 	        
 			<a id="help_button_tag"
-				style="margin-right: 6px;
+				style="margin-right: 0px;
 				"
 				class="mart_btn_help"
    			onmouseover="this.className='mart_btn_help mart_btnhov'" 
@@ -192,10 +311,45 @@
 					if (summaryCountElt2)	{
 						document.mainform.summarypanel_filter_count_2_hidden.value = summaryCountElt2.innerHTML;
 					}
-	         	javascript:void(window.open('/[% TAG_path %]/mview/help.html','martview','width=600,height=500,resizable,scrollbars'));	
+	         	javascript:void(window.open('/[% TAG_path %]/mview/help.html','martview','width=600,height=600,resizable,scrollbars'));	
 				" title ="Get Help">Help
 			</a>
+			&thinsp; <!-- Safari/Google Chrome rendering issue of a button. -->
 
+</td></tr><tr><td colspan="2" align="center" style="padding: 5px 10px;">
+
+                        <a id="das_button_tag"
+                                style="margin-right:1px;
+                                "
+                                class="mart_btn_das"
+                        onmouseover="this.className='mart_btn_das mart_btnhov'"
+                        onmouseout="this.className='mart_btn_das'"
+                onclick="
+			[% schema_name = session.param("schema").first %]
+			[% dataset_name = session.param("dataset").first %]
+		if (datasetExists() > 0) {
+			[% species_name = tbuilder.getSpeciesName(js_pushactions_of_datasetmenu, session.param("dataset").first) %]
+			[% default_coordinate = tbuilder.getDefaultCoordinate(species_name) %]
+			document.mainform.showquery.value = 0;
+			document.mainform.do_export.value = 0;
+			document.mainform.savequery.value = 0;
+			document.mainform.target = '_self';
+			var summaryCountElt1 = document.getElementById('summarypanel_filter_count_1');
+			if (summaryCountElt1) {
+				document.mainform.summarypanel_filter_count_1_hidden.value = summaryCountElt1.innerHTML;
+			}
+			var summaryCountElt2 = document.getElementById('summarypanel_filter_count_2');
+			if (summaryCountElt2) {
+				document.mainform.summarypanel_filter_count_2_hidden.value = summaryCountElt2.innerHTML;
+			}
+			javascript:void(window.open('http://sep2009.archive.ensembl.org/$species_name/Location/View?r=$default_coordinate;contigviewbottom=das:http://' + location.host + '/biomart/das/$schema_name' + '__' + '$dataset_name' + '__ensembl_das_chr=labels','martview','width=1300,height=800,resizable,scrollbars'));
+		}
+                                " title ="Open the Ensembl Genome Browser and display publication records as an external DAS track.">Ensembl DAS Track
+                        </a>
+                        &thinsp; <!-- Safari/Google Chrome rendering issue of a button. -->
+
+
+</td></tr></table>
 
 		</td>
 		</tr>

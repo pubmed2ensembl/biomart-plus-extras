@@ -44,7 +44,6 @@ use Data::Dumper;
 	my %ARGUMENTS;
 	$OPTIONS{logDir} = Cwd::cwd()."/logs/";
 	$OPTIONS{conf} = Cwd::cwd()."/conf/";
-        @{$OPTIONS{modules_in_dist}} = ("BioMart/Initializer.pm"); # quick fix: under certain situations Initializer.pm has to be the first one
 	for (my $i = 0; $i < scalar(@ARGV); $i++)
 	{
 		if ($ARGV[$i] eq "--recompile") 	{	$ARGUMENTS{recompile} = $ARGV[$i];	}
@@ -138,6 +137,12 @@ use Data::Dumper;
 	$OPTIONS{cgiLocation} =~ s/^\///g; # remove preceeding slashes
 	$OPTIONS{cgiLocation} =~ s/\/$//g; # remove slashes at the end
 	$OPTIONS{semanticAnnotations} = $settingsHash->{'semanticAnnotations'};
+	$OPTIONS{dbuser} = $settingsHash->{'databaseSettings'}{'username'};
+	$OPTIONS{dbpassword} = $settingsHash->{'databaseSettings'}{'password'};
+	$OPTIONS{dbhost} = $settingsHash->{'databaseSettings'}{'host'};
+	$OPTIONS{dbport} = $settingsHash->{'databaseSettings'}{'port'};
+	$OPTIONS{ensversion} = $settingsHash->{'ensemblDAS'}{'version'};
+	$OPTIONS{enssourcename} = $settingsHash->{'ensemblDAS'}{'sourcename'};
 	
 	print "\nAPACHE: ", $settingsHash->{'httpdSettings'}{'apacheBinary'};
 	print "\nHOST: ", $settingsHash->{'httpdSettings'}{'serverHost'};
@@ -362,6 +367,7 @@ foreach my $schema (@{$mart_registry->getAllVirtualSchemas()}) {
 }
 bin::ConfBuilder->updatehttpdConf(%OPTIONS);
 bin::ConfBuilder->makeDSN(%OPTIONS);
+bin::ConfBuilder->makeSOURCES(%OPTIONS);
 
 #------------------------------------------------------
 # Lets generate MartSoapService files
@@ -458,7 +464,7 @@ sub libModules
 				#print "\n", $module_name;
 			}
 			#print "\n", $module_name;
-			push @{$OPTIONS{modules_in_dist}}, $module_name unless ($module_name eq "BioMart/Initializer.pm");
+			push @{$OPTIONS{modules_in_dist}}, $module_name;
 
 		}
    	}

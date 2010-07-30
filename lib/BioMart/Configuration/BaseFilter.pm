@@ -1,4 +1,4 @@
-# $Id: BaseFilter.pm,v 1.5.2.1 2008-07-04 16:12:59 syed Exp $
+# $Id: BaseFilter.pm,v 1.5.2.1 2008/07/04 16:12:59 syed Exp $
 #
 # BioMart module for BioMart::Configuration::BaseFilter
 #

@@ -62,10 +62,6 @@ else {
 }
 
 my $CGI = $ENV{MOD_PERL} ? CGI->new(shift @_) : CGI->new();
-
-# removing hacking attempts using script tags
-$CGI->param($_,map{/<script/?q():$_}$CGI->param($_))for $CGI->param;
-
   
 # Initialize BioMart::Web if not already present via mod_perl persistance. Use global,
 # persistent Mart registry if that's available from the parent process.

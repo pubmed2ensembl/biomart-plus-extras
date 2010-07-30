@@ -1,5 +1,5 @@
 [% PROCESS 'header.tt' %]
-<!-- $Id: startpage.tt,v 1.1.1.1 2006-11-22 20:30:59 arek Exp $ -->
+<!-- $Id: startpage.tt,v 1.1.1.1 2006/11/22 20:30:59 arek Exp $ -->
 
 <div id="mart_containerpanel">
 

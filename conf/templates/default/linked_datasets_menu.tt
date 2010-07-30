@@ -1,4 +1,4 @@
-[% # $Id: linked_datasets_menu.tt,v 1.6 2007-10-10 14:08:02 syed Exp $ %]
+[% # $Id: linked_datasets_menu.tt,v 1.6 2007/10/10 14:08:02 syed Exp $ %]
 
 <!--never add height attribute in the following style. Safari loses sanity -->
 <div class="mart_datasetselectpanel" style="width:100%; overflow:auto;">

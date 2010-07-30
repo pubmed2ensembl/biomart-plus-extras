@@ -1,4 +1,4 @@
-#$Id: GenomicSequenceMod.pm,v 1.1.1.1 2006-11-22 20:32:23 arek Exp $
+#$Id: GenomicSequenceMod.pm,v 1.1.1.1 2006/11/22 20:32:23 arek Exp $
 #
 # BioMart module for BioMart::Dataset::GenomicSequenceMod
 #

@@ -1,4 +1,4 @@
-[% # $Id: filter_selectmenu.tt,v 1.8 2007-06-20 14:09:46 ds5 Exp $ %]
+[% # $Id: filter_selectmenu.tt,v 1.8 2007/06/20 14:09:46 ds5 Exp $ %]
 
 [% #--------------------------------------------------------------------
    # Macro for rendering a select-menu with filter options. Options can
@@ -49,7 +49,6 @@ document['${param_name}__image'].src='${filter.imageURL}';
   [* END *]
   
 [* END *]
-
 
 <select name="$param_name" id="idTag__${filtercollection_param_name}"
 [%  IF filter.multipleValues %]

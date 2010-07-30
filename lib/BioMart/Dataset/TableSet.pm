@@ -1,4 +1,4 @@
-# $Id: TableSet.pm,v 1.8.2.2 2009-07-24 08:05:04 syed Exp $
+# $Id: TableSet.pm,v 1.8 2008/04/09 12:52:33 syed Exp $
 #
 # BioMart module for BioMart::Dataset::TableSet
 #
@@ -775,7 +775,7 @@ sub _getCount {
     }
 
     $select = 'COUNT(*)';
-	my $filtList_List_flag = 0;
+
     # recover where clause from filters (and filterlists)
     my $filters = $query->getAllFilters;
   FILTERS: foreach my $filter (@$filters){
@@ -785,10 +785,7 @@ sub _getCount {
       # recover the tables
       if ($filter->isa("BioMart::Configuration::FilterList")
       	|| $filter->isa("BioMart::Configuration::FilterList_List")){
-        if ($filter->isa("BioMart::Configuration::FilterList_List")){
-		$filtList_List_flag = 1;
-	}
-	if ($filter->batching) {
+        if ($filter->batching) {
 	    $ret = 1; 
 	    $batching = 1;
 	    last FILTERS;
@@ -798,17 +795,8 @@ sub _getCount {
 	foreach my $list_filter (@$list_filters){
             my $table = $list_filter->table;
 	    $tables{$table} = 1;
-	    if ($table eq 'main'){
-		my $keys = $self->get('keys');
-		foreach my $key (reverse @$keys){
-		    last if (uc($joinTables{'main'}) eq uc($key));
-		    if (uc($list_filter->attribute->key) eq uc($key)){
-			$joinTables{'main'} = $key;
-			last;
-		    }
-		}
-	    }
-	    else{ # dm table
+	    if (!(($table =~ /main$/) && ($list_filter->attribute->key eq 
+					  ($self->get('keys')->[0])))){
 		$joinTables{$table} = $list_filter->attribute->key;
 	    }
 	}
@@ -816,18 +804,9 @@ sub _getCount {
       else{
 	  my $table = $filter->table;
 	  $tables{$table} = 1;
-	  if ($table eq 'main'){
-	      my $keys = $self->get('keys');
-	      foreach my $key (reverse @$keys){
-	  	last if (uc($joinTables{'main'}) eq uc($key));
-	  	if (uc($filter->attribute->key) eq uc($key)){
-	  	    $joinTables{'main'} = $key;
-	  	    last;
-	  	}
-	      }
-	  }
-	  else{# dm table
-	  	 $joinTables{$table} = $filter->attribute->key;
+	  if (!(($table =~ /main$/) && ($filter->attribute->key eq 
+					($self->get('keys')->[0])))){
+	      $joinTables{$table} = $filter->attribute->key;
 	  }
       }
       $and = ' AND ';
@@ -842,7 +821,6 @@ sub _getCount {
 
     # identify the lowest key and set main accordingly
     my $keys = $self->get('keys');
-
     if (%joinTables){
 	
 	$i = scalar @$keys - 1;
@@ -859,11 +837,10 @@ sub _getCount {
       $i = 0;# for when no join tables
     } 
 
-
     my $mains = $self->get('mains');
     $main = $$mains[$i];
 
-    if ($i != 0 || $filtList_List_flag){
+    if ($i != 0){
 	$select = 'COUNT(DISTINCT main.'.$$keys[0].')';
     }
 

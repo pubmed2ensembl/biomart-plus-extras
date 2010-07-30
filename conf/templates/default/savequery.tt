@@ -1,4 +1,4 @@
-[% # $Id: savequery.tt,v 1.1.1.1 2006-11-22 20:30:58 arek Exp $  %]
+[% # $Id: savequery.tt,v 1.1.1.1 2006/11/22 20:30:58 arek Exp $  %]
 [% #--------------------------------------------------------------------
    # Template for rendering the save-query popup window. Will show either
    # input field for query name, or confirmation that query was saved.

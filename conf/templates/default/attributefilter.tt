@@ -1,4 +1,4 @@
-[% # $Id: attributefilter.tt,v 1.3 2007-10-01 14:57:00 ds5 Exp $
+[% # $Id: attributefilter.tt,v 1.3 2007/10/01 14:57:00 ds5 Exp $
    # For most attributes we just need to show the display name and that's
    # it. But some are actually attributes in another dataset, so we need to
    # fetch the display name from that dataset config.

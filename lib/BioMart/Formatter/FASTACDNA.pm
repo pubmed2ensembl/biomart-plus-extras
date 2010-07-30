@@ -1,4 +1,4 @@
-# $Id: FASTACDNA.pm,v 1.2 2006-11-25 18:11:31 arek Exp $
+# $Id: FASTACDNA.pm,v 1.2 2006/11/25 18:11:31 arek Exp $
 #
 # BioMart module for BioMart::Formatter::FASTACDNA
 #

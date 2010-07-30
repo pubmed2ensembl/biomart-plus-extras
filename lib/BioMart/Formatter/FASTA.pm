@@ -1,4 +1,4 @@
-# $Id: FASTA.pm,v 1.4.2.1 2009-11-06 00:44:04 syed Exp $
+# $Id: FASTA.pm,v 1.4 2008/04/09 12:52:34 syed Exp $
 #
 # BioMart module for BioMart::Formatter::TXT
 #
@@ -79,18 +79,21 @@ sub nextRow {
     
     my $seq = ${$row}[0];
     ### SPECIAL LOGIC FOR SNP SEQUENCES, to make them agree with FASTA FORMAT
-    ### THE * indicates the separation between 2 snp up/downstream sequences
-    ### The allele would go into header, that comes from genomic sequence
-    ### in tags separating the two sequences and gets replaced by _,
-    ### this tag look like %allele%. eg. %A/T%. 
-    
+    ### THE * would suggest the split between two sequnce snp sequences
+    ### The allele would go into header, which comes from genomic sequence
+    ### in tags separating two snp sequences and that gets replaced by _,
+    ### this tag look like %allele%. eg. %A/T%. I am using this assumption
+    ### of % sign as TO DATE i have never seen a residue string containing
+    ### % sign, 
+    ### for those how want to post process them in a different way, may use _
+    ### as a splitting point
     if ($seq =~ m/\%(.*)\%/)
     {
 		$header_atts .= "|$1";
 		## also substiture with *
 		$seq =~ s/\%.*\%/\_/;
     }
-   
+    
     ########################################################################
     $seq =~ s/(\w{60})/$1\n/g;
     return ">" . $header_atts . "\n"

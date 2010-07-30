@@ -1,5 +1,61 @@
-<br/><br/>
+<br/>
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; YOUR SITE HEADER HERE
+<table style="width: 100%;">
+<tr>
+<td style="align: left;">
+
+<table>
+<tr>
+<td>
+<div style="width: 30px;">&nbsp;</div>
+</td>
+<td align="left" style="color: #777777;">
+<tt style="font-size: 10pt;">
+pubmed<b style="color: #f85a10;">2</b>ensembl&nbsp;&nbsp;<br/>
+</tt>
+</td>
+</tr>
+<tr>
+<td></td>
+<td align=center>
+<img src="http://pubmed2ensembl56.smith.man.ac.uk/GenePapersSmall.png" />
+</td>
+</tr>
+<tr>
+<td></td>
+<td align="right" style="color: #777777;">
+<i style="font-size: 8pt;">&nbsp;&nbsp;linking publications and genes</i>
+</td>
+</tr>
+</table>
+
+</td>
+<td align="right" valign="middle" style="vertical-align: middle;">
+
+<table style="background-color: #EEEEEE; border-style:solid; border-width: 1px; padding: 12px 8px 12px 8px; margin-left: 10px;">
+<tr>
+<td style="border-right: 1px solid #777777; padding: 0px 12px 0px 12px;">
+<a style="font-size: 9pt; text-decoration: none; color: #000000;" onclick="javascript:void(window.open('http://pubmed2ensembl56.smith.man.ac.uk/about.html','martview','width=600,height=600,resizable,scrollbars'));">About <tt style="font-size: 102%;">pubmed<b style="color: #f85a10;">2</b>ensembl</tt></a>
+</td>
+<td style="border-right: 1px solid #777777; padding: 0px 12px 0px 12px;">
+<a style="font-size: 9pt; text-decoration: none; color: #000000;" onclick="javascript:void(window.open('http://pubmed2ensembl56.smith.man.ac.uk/examples.html','martview','width=600,height=600,resizable,scrollbars'));">Examples</a>
+</td>
+<td style="border-right: 1px solid #777777; padding: 0px 12px 0px 12px;">
+<a style="font-size: 9pt; text-decoration: none; color: #000000;" href="http://bergmanlab.smith.man.ac.uk">Bergman Lab</a>
+</td>
+<td style="padding: 0px 8px 0px 12px;">
+<a style="font-size: 9pt; text-decoration: none; color: #000000;" href="http://www.manchester.ac.uk">The University of Manchester</a>
+</td>
+</tr>
+</table>
+
+</td>
+
+<td>
+<div style="width: 10px;">&nbsp;</div>
+</td>
+
+</tr>
+</table>
 
 <br/>

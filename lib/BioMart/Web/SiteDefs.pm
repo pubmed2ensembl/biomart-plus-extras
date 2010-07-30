@@ -1,4 +1,4 @@
-# $Id: SiteDefs.pm,v 1.2 2008-04-09 12:52:34 syed Exp $
+# $Id: SiteDefs.pm,v 1.2 2008/04/09 12:52:34 syed Exp $
 #
 # BioMart module for BioMart::SiteDefs
 #

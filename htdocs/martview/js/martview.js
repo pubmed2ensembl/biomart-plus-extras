@@ -1,4 +1,4 @@
-/* $Id: martview.js,v 1.35.2.1 2010-02-08 11:39:55 ds5 Exp $
+/* $Id: martview.js,v 1.35 2008/04/18 16:18:29 syed Exp $
 =head1 MartView client side JavaScript functions
 
 The following functions are used on the client side of a MartView request.
@@ -2142,7 +2142,7 @@ function datasetpanel_pre_onload(menuLists, sessionValues, schemaTitle, database
 		if (schemaCount > 1 && mergeVS == '0') {
 			document.mainform.schemamenu[j++] = new Option(schemaCaption, '', true, true);
 			for(i in dataForMenus['schema'])	{
-			    document.mainform.schemamenu[j++] = new Option(i.replace(/_/g, " "), i);
+				document.mainform.schemamenu[j++] = new Option(i, i);
 			}
 		}
 		else{ // donot show Virtual Schema menu
@@ -2173,7 +2173,7 @@ function datasetpanel_pre_onload(menuLists, sessionValues, schemaTitle, database
 				if(i == dsPanelSessionValues['schema']) {
 					toBeSelected = j;
 				}
-				document.mainform.schemamenu[j++] = new Option(i.replace(/_/g, " "), i);
+				document.mainform.schemamenu[j++] = new Option(i, i);
 			}
 			document.mainform.schemamenu[toBeSelected].selected='true';
 		}
@@ -2451,6 +2451,12 @@ function disableButtons()
 	document.getElementById("results_button_tag").className = "mart_btn_results_disabled";
 	document.getElementById("results_button_tag").onmouseover = function() {};
 	document.getElementById("results_button_tag").onmouseout = function() {};
+	document.getElementById("search_button_tag").className = "mart_btn_search_disabled";
+        document.getElementById("search_button_tag").onmouseover = function() {};
+        document.getElementById("search_button_tag").onmouseout = function() {};
+        document.getElementById("das_button_tag").className = "mart_btn_das_disabled";
+        document.getElementById("das_button_tag").onmouseover = function() {};
+        document.getElementById("das_button_tag").onmouseout = function() {};
 	document.getElementById("url_button_tag").className = "mart_btn_url_disabled";
 	document.getElementById("url_button_tag").onmouseover = function() {};
 	document.getElementById("url_button_tag").onmouseout = function() {};
@@ -2577,7 +2583,7 @@ function addLoadingImage(eltId, tagPath)
 /*
 	=head1 CVSINFO
 
-	$Id: martview.js,v 1.35.2.1 2010-02-08 11:39:55 ds5 Exp $ 
+	$Id: martview.js,v 1.35 2008/04/18 16:18:29 syed Exp $ 
 
 	=cut
 

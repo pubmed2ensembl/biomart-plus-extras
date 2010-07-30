@@ -205,4 +205,4 @@ linkName       = myNPDasLink
 feature_keys   = id,type,method,note
 
 
-$Id: README,v 1.1.1.1 2006-11-22 20:31:00 arek Exp $
+$Id: README,v 1.1.1.1 2006/11/22 20:31:00 arek Exp $

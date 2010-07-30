@@ -1,4 +1,4 @@
-# $Id: Registry.pm,v 1.10.2.1 2008-07-30 15:35:59 syed Exp $
+# $Id: Registry.pm,v 1.10.2.1 2008/07/30 15:35:59 syed Exp $
 #
 # BioMart module for BioMart::Registry
 #

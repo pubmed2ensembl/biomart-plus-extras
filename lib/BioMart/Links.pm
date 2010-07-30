@@ -1,4 +1,4 @@
-# $Id: Links.pm,v 1.3 2008-04-09 12:52:33 syed Exp $
+# $Id: Links.pm,v 1.3 2008/04/09 12:52:33 syed Exp $
 #
 # BioMart module for BioMart::Links.
 #

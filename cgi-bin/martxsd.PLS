@@ -147,7 +147,7 @@
 		<xs:sequence>
 			<xs:element name="name" type="xs:string"/>
 			<xs:element name="displayName" type="xs:string"/>			
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="filterGroup" type="tns:filterGroup"/>
+			<xs:element minOccurs="0" maxOccurs="1" name="filterGroup" type="tns:filterGroup"/>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="filterGroup">

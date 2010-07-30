@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: test.pl,v 1.1.1.1 2006-11-22 20:32:32 arek Exp $
+# $Id: test.pl,v 1.1.1.1 2006/11/22 20:32:32 arek Exp $
 
 use strict;
 use FindBin qw($Bin);

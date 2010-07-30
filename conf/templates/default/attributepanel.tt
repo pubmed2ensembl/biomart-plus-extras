@@ -1,4 +1,4 @@
-[% # $Id: attributepanel.tt,v 1.8 2007-07-02 13:32:49 syed Exp $ %]
+[% # $Id: attributepanel.tt,v 1.8 2007/07/02 13:32:49 syed Exp $ %]
 [% # Template to render all attribute-tree sections for a dataset, containing attribute
    # checkbox lists and related user-interface components %]
 

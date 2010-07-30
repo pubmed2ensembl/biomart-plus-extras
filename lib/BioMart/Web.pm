@@ -38,6 +38,11 @@ use strict;
 use warnings;
 use English;
 
+# Additional packages that are required for the NCBI esearch:
+use LWP::UserAgent;
+use HTTP::Request;
+use HTML::Entities;
+
 use Readonly;
 use Log::Log4perl;
 use Mail::Mailer;
@@ -80,6 +85,99 @@ our $VERSION = '0.4.9.0';
     	my $tt_processor;                # template processor
     	my $config;                      # configuration object
     	my $conf_dir;                    # configuration directory
+
+sub getSpeciesName
+{
+	my ($self, $hashref, $dataset_name) = @_;
+	my $menu = $hashref->{ 'databasemenu' };
+	my @menu_keys = keys %$menu;
+	my $databaseitem = $menu->{ $menu_keys[0] };
+	my $dataset2species = $databaseitem->{ 'datasetmenu_3' };
+
+	my $speciesName = "";
+	
+	foreach my $mapping (@$dataset2species) {
+
+		if (@$mapping[0] eq $dataset_name) {
+
+			my @description = split(' ', @$mapping[1]);
+
+			if ($#description >= 1) {
+
+				$speciesName = $description[0].'_'.$description[1];
+
+			}
+
+		}
+
+	}
+
+	return $speciesName;
+}
+
+sub getDefaultCoordinate
+{
+	my ($self, $speciesName) = @_;
+	# Default coordinates used when linking out to the Ensembl Genome Browser.
+	my %defaultCoordinates = (
+		"Anolis_carolinensis", "scaffold_163:603790-733056",
+		"Bos_taurus", "21:6794975-6922968",
+		"Caenorhabditis_elegans", "X:937766-957832",
+		"Callithrix_jacchus", "Contig3:4033712-4058239",
+		"Canis_familiaris", "X:42152150-42169554",
+		"Cavia_porcellus", "scaffold_10:32664325-33039888",
+		"Choloepus_hoffmanni", "GeneScaffold_6084:10515-28313",
+		"Ciona_intestinalis", "2q:5845122-5925717",
+		"Ciona_savignyi", "reftig_35:1-16756",
+		"Danio_rerio", "22:23684022-23844244",
+		"Dasypus_novemcinctus", "GeneScaffold_3145:1-504566",
+		"Dipodomys_ordii", "GeneScaffold_1085:1959-18403",
+		"Drosophila_melanogaster", "2L:21650001-21700000",
+		"Echinops_telfairi", "scaffold_269949:1-9162",
+		"Equus_caballus", "X:14898464-14976430",
+		"Erinaceus_europaeus", "GeneScaffold_2358:1-107709",
+		"Felis_catus", "GeneScaffold_3416:1-91634",
+		"Gallus_gallus", "Z:9907346-9929706",
+		"Gasterosteus_aculeatus", "groupI:18287526-18588610",
+		"Gorilla_gorilla", "scaffold_38581:632-2382",
+		# 57: "Gorilla_gorilla", "11:31775481-32025480",
+		"Homo_sapiens", "6:133017695-133161157",
+		"Loxodonta_africana", "GeneScaffold_2496:1-84775",
+		# 57: "Loxodonta_africana", "scaffold_29:2758508-2782922",
+		"Macaca_mulatta", "4:82972301-83097692",
+		"Macropus_eugenii", "GeneScaffold_6580:1-101024",
+		"Microcebus_murinus", "GeneScaffold_3416:1-722833",
+		"Monodelphis_domestica", "6:36217906-36423052",
+		"Mus_musculus", "4:136366473-136547301",
+		"Myotis_lucifugus", "GeneScaffold_3416:1-713068",
+		"Ochotona_princeps", "GeneScaffold_722:145353-324455",
+		"Ornithorhynchus_anatinus", "Ultra274:1048851-1231454",
+		"Oryctolagus_cuniculus", "GeneScaffold_3964:1-221924",
+		# 57: "Oryctolagus_cuniculus", "scaffold_14:1-221924",
+		"Oryzias_latipes", "14:31116527-31129337",
+		"Otolemur_garnettii", "GeneScaffold_3416:225712-281459",
+		"Pan_troglodytes", "10:1076881-1091061",
+		"Pongo_pygmaeus", "13:49731600-49766347",
+		"Procavia_capensis", "GeneScaffold_2545:4872-76283",
+		"Pteropus_vampyrus", "GeneScaffold_1226:48973-135755",
+		"Rattus_norvegicus", "5:162132007-162167596",
+		"Saccharomyces_cerevisiae", "IV:366098-466099",
+		"Sorex_araneus", "GeneScaffold_6285:1-6418",
+		"Spermophilus_tridecemlineatus", "GeneScaffold_5367:1-344799",
+		"Sus_scrofa", "7:60107914-60305245",
+		"Taeniopygia_guttata", "1A:38707363-38830227",
+		"Takifugu_rubripes", "scaffold_611:1-67046",
+		"Tarsius_syrichta", "GeneScaffold_4923:3027-16211",
+		"Tetraodon_nigroviridis", "1:783604-1032531",
+		"Tupaia_belangeri", "GeneScaffold_1344:1-278326",
+		"Tursiops_truncatus", "GeneScaffold_2231:107877-108537",
+		"Vicugna_pacos", "GeneScaffold_2975:863889-935911",
+		"Xenopus_tropicalis", "scaffold_20:2049675-2149674"
+	);
+
+	return $defaultCoordinates{ $speciesName };
+
+}
 
 sub get_mart_registry()
 {
@@ -1418,6 +1516,64 @@ sub handleXMLRequest
 
 }
 
+sub esearch
+{
+
+	my ($self, $CGI) = @_;
+
+	my $WORKED = 0;
+	my $FAILED = 1;
+
+	my $session = $self->restore_session($CGI);
+        my $browser = LWP::UserAgent->new();
+
+        $browser->timeout(15); # timeout after 15sec
+
+        my $queryLine = $CGI->Vars()->{'esearchField'};
+	$queryLine =~ s/ /+/g;
+        $queryLine = encode_entities($queryLine);
+
+	my $db = 'pubmed'; # fallback
+	my $esearchDB = $CGI->Vars()->{'esearchDB'};
+	if ($esearchDB eq 'esearchPubMedTable') {
+		$db = 'pubmed';
+	} else {
+		$db = 'pmc';
+	}
+
+        my $query = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=".$db."&term=".$queryLine."&retmax=".$CGI->Vars()->{'esearchRetMax'};
+
+        my $httpRequest = HTTP::Request->new(GET => $query);
+        my $eutilResponse = $browser->request($httpRequest);
+
+        if ($eutilResponse->is_error())
+        {
+
+		print $CGI->header();
+
+	        print "<html><head><title>Error: esearch failed</title></head>".
+	              "<body><b>An error occured whilst carrying out an esearch query.</b><br />".
+	              "<br /><i>Broser status:</i> ".$eutilResponse->status_line."</body></html>";
+
+                return ($FAILED, $eutilResponse->status_line, $query, '');
+
+	}
+
+	return ($WORKED, $eutilResponse->status_line, $query, $eutilResponse->content(), $db);
+
+}
+
+sub esearch_errormsg
+{
+
+	my ($self, $msg) = @_;
+
+        print "<html><head><title>Error: esearch failed</title></head>".
+              "<body><b>An error occured whilst carrying out an esearch query.</b><br />".
+              "<br /><i>Broser status:</i> ".$msg."</body></html>";
+
+}
+
 =head2 handle_request
 
   Usage      : $bmweb->handle_request(CGI->new());
@@ -1467,6 +1623,146 @@ sub handle_request {
 		return if ($returnVal eq 'exit'); ## exception thrown	
 	}
 	
+	#------------------------------------------------------------------------
+	# NCBI esearch
+	# -----------------------------------------------------------------------
+	if (($CGI->Vars()->{'resultsButton'}) &&
+		$CGI->Vars()->{'resultsButton'} eq '5' &&
+		$CGI->Vars()->{'esearchField'})
+	{
+
+		my ($eutilFailed, $eutilStatus, $eutilQuery, $eutilStringResult, $eutilDB) = $self->esearch($CGI);
+
+		if ($eutilFailed) {
+
+                	print $CGI->header();
+			$self->esearch_errormsg($eutilStatus);
+
+			return;
+
+		}
+
+		$session->param('esearchQuery', $eutilQuery);
+
+		my $xmlParser = new XML::Simple();
+		my $eutilXML = $xmlParser->XMLin($eutilStringResult, forcearray => [ qw(eSearchResult IdList Id) ], keyattr => []);
+		my $filterString = "";
+		my @idArray = $eutilXML->{ "IdList" };
+
+		my @countArray = $eutilXML->{ "Count" };
+		my $countValue = $countArray[0];
+
+		if ($countValue > 0) {
+
+			foreach my $idListSeq (@idArray) {
+				foreach my $idSeq (@$idListSeq) {
+					foreach my $idArray ($idSeq->{ "Id" }) {
+						foreach my $id (@$idArray) {
+
+							if ($eutilDB eq 'pmc') {
+								$filterString = $filterString.", PMC".$id;
+							} else {
+								$filterString = $filterString.", ".$id;
+							}
+
+						}
+					}
+				}
+			}
+
+			$filterString = substr $filterString, 2; # remove the leading comma
+
+		} else {
+
+			$filterString = "-1";
+
+		}
+
+		my $dataset = $CGI->Vars()->{'datasetmenu_3'};
+
+		$session->param('esearchDataset', $dataset);
+		$session->param('esearchFilterString', $filterString);
+		$session->param('esearchCount', $countValue);
+		#$session->param('esearchOffset', 0); # current offset within the search result
+
+		my $vs_dataset_name = $session->param('schema').'____'.$dataset;
+		#my $filterlist = $session->param($vs_dataset_name.'__filterlist');
+		my $searchTable = $CGI->Vars()->{'esearchDB'}; # returns the name of the SELECT box that selects the filter
+		my $searchColumn = $CGI->Vars()->{$searchTable};
+		my $filter = $dataset.'__filter.'.$searchColumn;
+
+		my $previousFilter = $session->param('esearchFilter'); # might be undef, but that works alright below
+
+		if ($previousFilter) {
+
+                        $session->clear($previousFilter.'__text');
+
+                }
+
+		$session->param('esearchName', $searchColumn);
+		$session->param('esearchFilter', $filter);
+
+		$session->param($filter.'__text', $filterString);
+
+	} else {
+		
+		if ($CGI->Vars()->{'esearchField'})
+		{
+
+			my ($eutilFailed, $eutilStatus, $eutilQuery, $eutilStringResult, $eutilDB) = $self->esearch($CGI);
+
+			if ($eutilFailed) {
+
+				print $CGI->header();
+				$self->esearch_errormsg($eutilStatus);
+
+				return;
+
+			}
+
+			my $previousFilter = $session->param('esearchFilter');
+
+			if ($previousFilter) {
+
+				$session->clear($previousFilter.'__text');
+
+			}
+
+			my $xmlParser = new XML::Simple();
+			my $eutilXML = $xmlParser->XMLin($eutilStringResult, forcearray => [ qw(eSearchResult IdList Id) ], keyattr => []);
+			my $filterString = "";
+			my @idArray = $eutilXML->{ "IdList" };
+
+			foreach my $idListSeq (@idArray) {
+				foreach my $idSeq (@$idListSeq) {
+					foreach my $idArray ($idSeq->{ "Id" }) {
+						foreach my $id (@$idArray) {
+
+							if ($eutilDB eq 'pmc') {
+								$filterString = $filterString.", PMC".$id;
+							} else {
+								$filterString = $filterString.", ".$id;
+							}
+	
+						}
+					}
+				}
+			}
+
+			$filterString = substr $filterString, 2; # remove the leading comma
+
+			my $dataset = $CGI->Vars()->{'datasetmenu_3'};
+
+			my $searchTable = $CGI->Vars()->{'esearchDB'}; # returns the name of the SELECT box that selects the filter
+			my $searchColumn = $CGI->Vars()->{$searchTable};
+			my $filter = $dataset.'__filter.'.$searchColumn;
+
+			$session->param($filter.'__text', $filterString);
+
+		}
+
+	}
+
 	#------------------------------------------------------------------------
 	# if its a count/Results request, only save the session, and go back sending
 	# nothing back to the target = 'hiddenIFrame'
@@ -1703,7 +1999,7 @@ sub handle_request {
 	{		
 		# NEW QUERY, set NO DEFAULTS
 		# print "***** 1";
-		print $CGI->header(-charset=>'utf-8');
+		print $CGI->header();
 		$session->param('newQuery', '1');
 		$js_datasetpanel_sessions_values{'schema'} = '';
 		$js_datasetpanel_sessions_values{'databasmenu'} = '';
@@ -1981,7 +2277,7 @@ sub handle_request {
 			# Pull out filter & attribute params for this dataset and prepare the query
 			my $vs_dataset_name = $session->param('schema').'____'.$dataset_name;
 			my $filterlist_string    = $session->param($vs_dataset_name.'__filterlist') if ($session->param($vs_dataset_name.'__filterlist'));
-			
+
 			my $attributepage        = $session->param($dataset_name.'__attributepage') if ($session->param($dataset_name.'__attributepage'));
 			
 			my $attributelist_string = $session->param($vs_dataset_name.'__'.($attributepage||'').'__attributelist');
@@ -1992,6 +2288,17 @@ sub handle_request {
 			my @filterlist = !defined($filterlist_string) ? ()
 	                 		: ref($filterlist_string) ? @$filterlist_string 
 								: ($filterlist_string); 
+
+			# Force the esearchFilter into the filterlist:
+			#my $esearchFilterFound = 0;
+			#foreach my $filter (@filterlist) {
+			#	if ($filter eq $session->param('esearchFilter')) {
+			#		$esearchFilterFound = 1;
+			#	}
+			#}
+			#if ($esearchFilterFound == 0) {
+			#	push (@filterlist, $session->param('esearchFilter'));
+			#}
 		
 			my @attributelist = !defined($attributelist_string) ? ()
 	                    	: ref($attributelist_string) ? @$attributelist_string 
@@ -2023,7 +2330,6 @@ sub handle_request {
 	    	my ($values_of_filter, $attributes, $values_of_attributefilter)
 				= $self->extract_queryparams($session->dataref(), \@filterlist, \@attributelist);
 	    
-
 	    	# Add filters(if any) to single-dset query to get counts
 			push(@dataset_names_in_query, $dataset_name);
 		   		
@@ -2104,7 +2410,6 @@ sub handle_request {
 				$countStringForJS .= $total_count || 0;
 				$countStringForJS .= ' ';
 				$countStringForJS .= $registry->getConfigTreeForDataset($dataset_name, $schema_name, 'default')->entryLabel || 'Entries';
-				$countStringForJS = "Count unavailable" if ($registry->getConfigTreeForDataset($dataset_name, $schema_name, 'default')->entryLabel eq "Count unavailable");
 			}
 
 		    # Add filters & atts to main query as well, if any		
@@ -2160,21 +2465,21 @@ sub handle_request {
 				$tempered_xml =~s/softwareVersion/datasetConfigVersion/g;
 				$tempered_xml =~s/</&lt;/g;
 				$tempered_xml =~s/>/&gt;/g;
-				print $CGI->header(-charset=>'utf-8');
+				print $CGI->header();
 				print "<html><body><pre>$tempered_xml</pre></body></html>";
 			}
 			# PERL API equivalent of the query
 			if ($showQuery eq '2') {
 				my $tempered_perlScript = $query_main->toPerl();
 				$tempered_perlScript =~ s/my \$query_runner = BioMart::QueryRunner->new\(\)\;/\$query->formatter\(\"$exportView_formatter_name\"\)\;\n\nmy \$query_runner = BioMart::QueryRunner->new\(\)\;/;
-				print $CGI->header(-charset=>'utf-8');
+				print $CGI->header();
 				print "<html><body><pre>$tempered_perlScript</pre></body></html>";
 			}
 			# URL access equivalent of the query
 			if ($showQuery eq '3') {
 				my $xml = $query_main->toXML(1,1,1,1);
 				my $url_string = $CGI->url(-full => 1) . $self->getURLBookmark($registry, $xml, $session);
-				print $CGI->header(-charset=>'utf-8');
+				print $CGI->header();
 				print "<html><body><pre>$url_string</pre></body></html>";
 			}
 			$session->clear('showquery'); # so we don't get stuck a this stage
@@ -2370,18 +2675,15 @@ sub handle_request {
 							
 							# Work out CGI headers
 							if ($export_saveto eq 'text') {
-								print $CGI->header(-type=>$formatter->getMimeType(),
-											-charset=>'utf-8');
+								print $CGI->header(-type=>$formatter->getMimeType());
 							}
 							elsif ($export_saveto eq 'gz') {
 								print $CGI->header(-type=>'application/octet-stream',
-										-attachment=>$file,
-										-charset=>'utf-8');
+										-attachment=>$file);
 							}
 							else {
 								print $CGI->header(-type=>$formatter->getMimeType(),
-										-attachment=>$file,
-										-charset=>'utf-8');
+										-attachment=>$file);
 							}
 							
 				   		# Create results.
@@ -2430,6 +2732,16 @@ sub handle_request {
 	    						$query_main->formatter($preView_formatter_name);
 		    					$query_main->count(0);# don't get count below
 		    					$qrunner->uniqueRowsOnly(1) if ($session->param('uniqueRowsPreView') && $session->param('uniqueRowsPreView') eq '1');
+
+								if ($session->param('esearchFilterString')) {
+
+									$query_main->{'esearchDataset'} = $session->param('esearchDataset');
+									$query_main->{'esearchName'} = $session->param('esearchName');
+									$query_main->{'esearchFilterString'} = $session->param('esearchFilterString');
+									$query_main->{'esearchBag'} = {};
+
+								}
+
 								$qrunner->execute($query_main);
 								
 								undef $export_subset if ($export_subset eq 'All');
@@ -2446,6 +2758,53 @@ sub handle_request {
 								    $result_string =~ s/\<\/body.+\Z//xms;
 								    # apply different css styles here, the classes now removed from
 								    # HTML formatter as for EXPORT options, no point having those
+								    if ($session->param('esearchFilterString'))
+								    {
+
+									# Debugging..
+									#my $x = 'Filter string: '.$session->param('esearchFilterString').'<br />';
+									#$x .= 'Filter: '.$session->param('esearchFilter').'<br />';
+									#$x .= 'Name: '.$session->param('esearchName').'<br />';
+									#$result_string =~ s/\<table\>/$x\<table\>/gxms;
+
+									my @filterList = split(", ", $session->param('esearchFilterString'));
+
+									my $filterExcerpt;
+									my $maxDisplayedFilters = 5;
+
+									if (scalar(@filterList) > $maxDisplayedFilters) {
+
+										for (my $i = 0; $i < $maxDisplayedFilters; $i++) {
+
+											$filterExcerpt = $filterExcerpt.", ".$filterList[$i];
+
+										}
+
+										$filterExcerpt = substr $filterExcerpt, 2;
+
+										$filterExcerpt = $filterExcerpt.", ... <i> (".(scalar(@filterList) - $maxDisplayedFilters)." more)</i>";
+
+									} else {
+
+										if ($session->param('esearchFilterString') eq "-1") {
+
+											$filterExcerpt = "empty";
+
+										} else {
+
+											$filterExcerpt = $session->param('esearchFilterString');
+
+										}
+
+									}
+
+									my $esearchQuery = $session->param('esearchQuery');
+
+								    	my $filterString = '<table border="0" style="border-style: none; width: 100%; font-family: Arial,sans-serif; font-size: 10pt;"><tr><td width="180pt" style="border-style: none; width=150pt; color: #777777;"><b>NCBI&#146;s <i>esearch</i> result:</b></td><td style="border-style: none; color: #777777;">'.$filterExcerpt.'&nbsp;&nbsp;&nbsp;<a class="mart_btn_go" style="text-decoration: none;" onmouseover="this.className=\'mart_btn_go mart_btnhov_go\'" onmouseout="this.className=\'mart_btn_go\'" onclick="javascript:void(window.open(\''.$esearchQuery.'\',\'martview\',\'width=600,height=500,resizable,scrollbars\'));">XML</a><br /></td></tr></table><br />';
+									$result_string =~ s/\<table\>/$filterString\<table\>/gxms;
+									$session->clear('esearchFilterString');
+									$session->clear($session->param('esearchFilter').'__text');
+								    }
 								    # class tags in there
 								    $result_string =~ s/\<table\>/\<table\ class=\"mart_table\">/gxms;
 								    $result_string =~ s/\<th\>/\<th\ class=\"mart_th\">/gxms;						    		
@@ -2491,6 +2850,7 @@ sub handle_request {
 				
    			$logger->debug("Serious error: ".$ex);
      			UNIVERSAL::can($ex, 'rethrow') ? $ex->rethrow : die $ex;
+     			print "Serious Error: ", $errmsg;
  			}
 		  	else 
 		  	{
@@ -2555,7 +2915,7 @@ sub handle_request {
 			}
 			
 			my $display_string = join ",",@outputformat_displays;
-			print $CGI->header(-charset=>'utf-8');			
+
 			print lc($preView_formatter_name);
 			print '____';
 			print $display_string;

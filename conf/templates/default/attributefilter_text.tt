@@ -1,4 +1,4 @@
-[% # $Id: attributefilter_text.tt,v 1.2 2007-01-09 17:16:00 rh4 Exp $ %]
+[% # $Id: attributefilter_text.tt,v 1.2 2007/01/09 17:16:00 rh4 Exp $ %]
 
 [% #--------------------------------------------------------------------
    # Macro for rendering form element(s) for a simple text filter. The

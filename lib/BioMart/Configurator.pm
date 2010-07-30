@@ -1,4 +1,4 @@
-# $Id: Configurator.pm,v 1.17.2.1 2008-07-04 16:12:59 syed Exp $
+# $Id: Configurator.pm,v 1.17.2.1 2008/07/04 16:12:59 syed Exp $
 #
 # BioMart module for BioMart::Configurator
 #
@@ -448,10 +448,128 @@ sub getConfigurationTree {
                         'displayName' => $xmlFilterCollection->{'displayName'},
    	                 'description' => $xmlFilterCollection->{'description'},
 								  );
+
+                my @x = ();
                 foreach my $xmlFilter
                     (@{ $xmlFilterCollection->{'FilterDescription'} }) {
                    	 	next if ($xmlFilter->{'hidden'} 
 						     	&& $xmlFilter->{'hidden'} eq 'true');
+
+                    # HACK
+                    if ($xmlFilterCollection->{'internalName'} eq 'id_list_limit' &&
+                            $xmlFilter->{'internalName'} eq 'id_list_limit_filters') {
+                        my $containsEntrez = 0;
+                        my $containsPMCPMID = 0;
+                        my $containsMEDLINE = 0;
+                        my $containsEMBLBLAST = 0;
+                        my $containsEMBLXREF = 0;
+                        my $containsTEXTPMID = 0;
+                        my $containsPMCPMCID = 0;
+                        my $containsTEXTPMCID = 0;
+                        foreach my $filter (@{ $xmlFilter->{'Option'} }) {
+                                if ($filter->{'field'} eq 'pmid_1093') { $containsEntrez = 1; push (@x, $filter); }
+                                elsif ($filter->{'field'} eq 'pmid_1099') { $containsPMCPMID = 1; push (@x, $filter); }
+                                elsif ($filter->{'field'} eq 'pmid_1095') { $containsMEDLINE = 1; push (@x, $filter); }
+                                elsif ($filter->{'field'} eq 'pmid_1089') { $containsEMBLBLAST = 1; push (@x, $filter); }
+                                elsif ($filter->{'field'} eq 'pmid_1091') { $containsEMBLXREF = 1; push (@x, $filter); }
+                                elsif ($filter->{'field'} eq 'pmid_10102') { $containsTEXTPMID = 1; push (@x, $filter); }
+                                elsif ($filter->{'field'} eq 'pmcid_1099') { $containsPMCPMCID = 1; push (@x, $filter); }
+                                elsif ($filter->{'field'} eq 'pmcid_10102') { $containsTEXTPMCID = 1; push (@x, $filter); }
+                                else { push (@x, $filter) };
+                        }
+                        my $defaultFilter = {
+                                'legal_qualifiers', '=,in',
+                                'key', 'gene_id_1020_key',
+                                'isSelectable', 'true',
+                                'qualifier', '=',
+                                'internalName', '-- internal name --',
+                                'displayType', 'text',
+                                'type', 'list',
+                                'multipleValues', '1',
+                                'checkForNulls', 'true',
+                                'displayName', 'Template Entrey',
+                                'field', '-- table column name --',
+                                'tableConstraint', '-- table name --'
+                        };
+                        if ($containsEntrez == 1) {
+                                my %customFilter = %$defaultFilter;
+                                $customFilter{'internalName'} = 'pmid_1093';
+                                $customFilter{'displayName'} = 'Entrez: PubMed ID(s)';
+                                $customFilter{'field'} = 'pmid_1093';
+                                $customFilter{'tableConstraint'} = 'mscript_entrez__dm';
+                                unshift (@x, \%customFilter);
+                        }
+                        if ($containsPMCPMID == 1) {
+                                my %customFilter = %$defaultFilter;
+                                $customFilter{'internalName'} = 'pmid_1099';
+                                $customFilter{'displayName'} = 'PMC: PubMed ID(s)';
+                                $customFilter{'field'} = 'pmid_1099';
+                                $customFilter{'tableConstraint'} = 'mscript_pmc__dm';
+                                unshift (@x, \%customFilter);
+                        }
+                        if ($containsPMCPMCID == 1) {
+                                my %customFilter = %$defaultFilter;
+                                $customFilter{'internalName'} = 'pmcid_1099';
+                                $customFilter{'displayName'} = 'PMC: PubMed Central ID(s)';
+                                $customFilter{'field'} = 'pmcid_1099';
+                                $customFilter{'tableConstraint'} = 'mscript_pmc__dm';
+                                unshift (@x, \%customFilter);
+                        }
+                        if ($containsMEDLINE == 1) {
+                                my %customFilter = %$defaultFilter;
+                                $customFilter{'internalName'} = 'pmid_1095';
+                                $customFilter{'displayName'} = 'MEDLINE: PubMed ID(s)';
+                                $customFilter{'field'} = 'pmid_1095';
+                                $customFilter{'tableConstraint'} = 'mscript_medline__dm';
+                                unshift (@x, \%customFilter);
+                        }
+                        if ($containsEMBLBLAST == 1) {
+                                my %customFilter = %$defaultFilter;
+                                $customFilter{'internalName'} = 'pmid_1089';
+                                $customFilter{'displayName'} = 'EMBL BLAST: PubMed ID(s)';
+                                $customFilter{'field'} = 'pmid_1089';
+                                $customFilter{'tableConstraint'} = 'mscript_blast56_c100t__dm';
+                                unshift (@x, \%customFilter);
+                        }
+                        if ($containsEMBLXREF == 1) {
+                                my %customFilter = %$defaultFilter;
+                                $customFilter{'internalName'} = 'pmid_1091';
+                                $customFilter{'displayName'} = 'EMBL XREF: PubMed ID(s)';
+                                $customFilter{'field'} = 'pmid_1091';
+                                $customFilter{'tableConstraint'} = 'mscript_embl__dm';
+                                unshift (@x, \%customFilter);
+                        }
+                        if ($containsTEXTPMID == 1) {
+                                my %customFilter = %$defaultFilter;
+                                $customFilter{'internalName'} = 'pmid_10102';
+                                $customFilter{'displayName'} = 'text2genome: PubMed ID(s)';
+                                $customFilter{'field'} = 'pmid_10102';
+                                $customFilter{'tableConstraint'} = 'mscript_text__dm';
+                                unshift (@x, \%customFilter);
+                        }
+                        if ($containsTEXTPMCID == 1) {
+                                my %customFilter = %$defaultFilter;
+                                $customFilter{'internalName'} = 'pmcid_10102';
+                                $customFilter{'displayName'} = 'text2genome: PubMed Central ID(s)';
+                                $customFilter{'field'} = 'pmcid_10102';
+                                $customFilter{'tableConstraint'} = 'mscript_text__dm';
+                                unshift (@x, \%customFilter);
+                        }
+                        #print Dumper(@x);
+                        #print Dumper(@{ $xmlFilterCollection->{'FilterDescription'} });
+                        #exit;
+                    }
+            };
+
+                foreach my $xmlFilter
+                (@{ $xmlFilterCollection->{'FilterDescription'} }) {
+                                next if ($xmlFilter->{'hidden'}
+                                                        && $xmlFilter->{'hidden'} eq 'true');
+
+                    if ($xmlFilterCollection->{'internalName'} eq 'id_list_limit' &&
+                            $xmlFilter->{'internalName'} eq 'id_list_limit_filters') {
+                            $xmlFilter->{'Option'} = [@x];
+                    }
 						    	my $attribute;
 						   	$attribute = $configurationTree->
 								getAttributeByName($xmlFilter->{'internalName'});

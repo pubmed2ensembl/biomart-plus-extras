@@ -1,4 +1,4 @@
-<!-- $Id: wizard_menubar.tt,v 1.1.1.1 2006-11-22 20:30:59 arek Exp $ -->
+<!-- $Id: wizard_menubar.tt,v 1.1.1.1 2006/11/22 20:30:59 arek Exp $ -->
 
 <input type="image" name="submit.new" src="/martview/images/new-on.gif" value="New" onclick="document.mainform.next_stage.value = 'new'; document.mainform.submit();" />
 <img src="/martview/images/arrow-on.gif" alt="" />

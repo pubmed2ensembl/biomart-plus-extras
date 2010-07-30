@@ -1,4 +1,4 @@
-# $Id: SAME.pm,v 1.3 2007-10-16 16:03:17 ds5 Exp $
+# $Id: SAME.pm,v 1.3 2007/10/16 16:03:17 ds5 Exp $
 #
 # BioMart module for BioMart::Formatter::SAME
 #

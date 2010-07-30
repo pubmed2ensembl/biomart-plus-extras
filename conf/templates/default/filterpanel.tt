@@ -1,4 +1,4 @@
-[% # $Id: filterpanel.tt,v 1.8 2007-11-19 17:58:30 syed Exp $ %]
+[% # $Id: filterpanel.tt,v 1.8 2007/11/19 17:58:30 syed Exp $ %]
 [% #--------------------------------------------------------------------
    # Template for a filter panel which contains the following Mart-config
    # elements: filtertree->filtergroup->filtercollection->filter . The last

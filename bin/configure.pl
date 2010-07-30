@@ -277,17 +277,15 @@ print "\n";
 sub getLibModules
 {
 	my @dirnames = [];
-        while (my $dirname = shift) {
-                push @dirnames, $dirname;
-        }
-
-        foreach my $dirname (@dirnames) {
-        next if (ref($dirname) eq 'ARRAY');
-        opendir (DIR, $dirname);
-        my @entries = readdir (DIR);
-        closedir (DIR);
-
- 
+	while (my $dirname = shift) {
+		push @dirnames, $dirname;
+	}
+	
+	foreach my $dirname (@dirnames) {
+ 	opendir (DIR, $dirname);
+ 	my @entries = readdir (DIR);
+  	closedir (DIR);
+   
    	foreach my $entry (@entries)
    	{
 	  	next if $entry eq ".";

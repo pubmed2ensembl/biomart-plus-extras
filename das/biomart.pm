@@ -1,6 +1,6 @@
 package Bio::Das::ProServer::SourceAdaptor::biomart;
 
-#   $Id: biomart.pm,v 1.1.1.1 2006-11-22 20:30:59 arek Exp $
+#   $Id: biomart.pm,v 1.1.1.1 2006/11/22 20:30:59 arek Exp $
 
 use strict;
 use warnings;

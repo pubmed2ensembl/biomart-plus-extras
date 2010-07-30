@@ -1,4 +1,4 @@
-# $Id: GenomicAlign.pm,v 1.2 2006-11-25 18:11:31 arek Exp $
+# $Id: GenomicAlign.pm,v 1.2 2006/11/25 18:11:31 arek Exp $
 #
 # BioMart module for BioMart::Dataset::GenomicSequence
 # You may distribute this module under the same terms as perl itself

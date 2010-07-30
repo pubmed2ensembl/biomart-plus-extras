@@ -1,4 +1,4 @@
-[% # $Id: filter.tt,v 1.4 2007-05-05 16:01:17 syed Exp $ %]
+[% # $Id: filter.tt,v 1.4 2007/05/05 16:01:17 syed Exp $ %]
 [% #--------------------------------------------------------------------
    # Macro for rendering a filter as specified in the Mart-config. This
    # may be an single, actual filter, or a container holding several

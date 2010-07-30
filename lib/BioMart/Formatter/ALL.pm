@@ -1,4 +1,4 @@
-# $Id: ALL.pm,v 1.2 2007-10-16 16:03:17 ds5 Exp $
+# $Id: ALL.pm,v 1.2 2007/10/16 16:03:17 ds5 Exp $
 #
 # BioMart module for BioMart::Formatter::ALL
 #

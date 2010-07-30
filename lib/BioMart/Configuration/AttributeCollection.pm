@@ -1,4 +1,4 @@
-# $Id: AttributeCollection.pm,v 1.4 2008-04-09 12:52:33 syed Exp $
+# $Id: AttributeCollection.pm,v 1.4 2008/04/09 12:52:33 syed Exp $
 #
 # BioMart module for BioMart::Configuration::AttributeCollection
 #
