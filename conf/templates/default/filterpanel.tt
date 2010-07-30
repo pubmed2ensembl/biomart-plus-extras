@@ -1,0 +1,189 @@
+[% # $Id: filterpanel.tt,v 1.8 2007-11-19 17:58:30 syed Exp $ %]
+[% #--------------------------------------------------------------------
+   # Template for a filter panel which contains the following Mart-config
+   # elements: filtertree->filtergroup->filtercollection->filter . The last
+   # item is the individual filter which has its own template (see filter.tt).
+   #   This template is used by the template-builder to create a secondary
+   # dataset-specific template from a Mart config. See TemplateBuilder.pm for
+   # more details.
+   #--------------------------------------------------------------------
+%]
+
+[% PROCESS 'filtercollection.tt'    %]
+[% PROCESS 'collapsible_section.tt' %]
+[% PROCESS 'filter.tt'              %]
+
+[* param_prefix = param_prefix || '' # just so we don't get undef-errors if no prefix is specified *]
+[* js_session_value_of_filtermenu = {} *]
+
+<div id="[% dataset.name %]__filterpanel" style="display: none; width:100%; height:100%; overflow:auto; position: relative;">
+<table width="100%" height="100%"  border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed;">
+<tr>
+<td width="100%" height="100%" valign="top" align="left">
+
+<div class="dummyLine_1" align="center"><b>Please restrict your query using criteria below</b></div>
+
+<div class="mart_filterpanel">
+
+[% # NOTE TO SELF: do we need multiple filterpage menu here, or...? %]
+[% FOREACH filtertree = filtertrees %]
+	[% NEXT IF filtertree.hideDisplay() == 'true' # show only non-hidden trees %]
+
+	[% default_filters = [] %]
+	
+	[% filtgroupcount = 0 %]
+	[% FOREACH filtergroup = filtertree.getAllFilterGroups %]
+		[% filtgroupcount = filtgroupcount + 1 %]
+	[% END %]
+	
+	[% IF filtgroupcount > 1 %]
+		[% filtergroup_initial_state = "hide"  # by default none of the groups should be expanded if more than one group %]
+	[% ELSE %]
+		[% filtergroup_initial_state = "show"  # by default the first filt-group section should be expanded only if there is only one group %]
+	[% END %]
+
+	[% 	# array to store collection names for defaultOn = true for default filters
+		# its going to be tested against session parameter of filters when a page is reloaded
+		# if session has any filters than it means the default filters should not be used - just as in attributes case  
+	%]
+	[% default_attributes = [] # hold list of default filters to be added. these are declared in XML as defaultOn = true %]   
+	[% FOREACH filtergroup = filtertree.getAllFilterGroups %]
+		[% NEXT IF filtergroup.hideDisplay() == 'true' # show only non-hidden groups %]
+
+		<div class="mart_filtergroup floatholder">
+
+		[% # Setup form-elements + Javascript at runtime, for show/hide collapsible filtergroup sections. %]
+		[% filtergroup_parname = '${param_prefix}filtergroup.' _ filtergroup.name %]
+		[* render_collapse_controls("$filtergroup_parname", "$filtergroup.displayName", "$filtergroup_initial_state", "$filtergroup.description" ) *]
+		[% filtergroup_initial_state = "hide" IF filtergroup_initial_state == "show" %]
+
+		[% FOREACH filtercollection = filtergroup.getAllCollections %]
+		    [% NEXT IF filtercollection.hideDisplay() == 'true' # show only non-hidden collections %]
+	
+			<div class="mart_filtercollection" id="[* param_prefix *]filtercollection.[% filtercollection.name %]">
+
+			[% # Render checkbox in front of filtercollection, indicates whether it's is enabled or not. But
+			   # note that it's only rendered here IF we have multiple filters, otherwise it's rendered
+			   # within the individual-filter section (i.e. if there's just one filter in the collection)
+			%]
+			[% filters = filtercollection.getAllFilters() %]
+		
+			[% IF filters.size > 1 %]
+				[% # incase we have more than one filter, we are sending only the first one as thats what it expects in the function. %]
+
+				[% filtercollection_paramname = "\${param_prefix}filtercollection." _ filtercollection.name %] 
+
+				[% render_filtercollection_checkbox(filters.0, filtercollection) %]
+				[% IF filtercollection.description %]
+				  <a title="[% filtercollection.description | replace('"','&quot;') %]">$filtercollection.displayName</a>
+				[% ELSE %]
+					$filtercollection.displayName
+				[% END %]
+				[% # Get all non-hidden filters in this filtercollection and render them %]
+
+				[% FOREACH filter = filtercollection.getAllFilters() %]
+					[% NEXT IF filter.hideDisplay() == 'true' %]					
+					[% render_filter(filter) %]
+					[% IF filter.defaultOn.defined() && filter.defaultOn == "true"  %]
+		  				[% default_filters.push("\"$filtercollection_paramname\"") # add to list to set as default filter %]
+	  				[% END %]
+				[% END %]
+				<br />
+			[% ELSIF filters.size == 1 %]
+				[% filter = filters.0 %]
+				[% NEXT IF filter.hideDisplay() == 'true' %]
+				[% render_filter(filter, filtercollection) %] 
+				[% filtercollection_paramname = "\${param_prefix}filtercollection." _ filtercollection.name %] 
+				[% IF filter.defaultOn.defined() && filter.defaultOn == "true"  %]
+  					[% default_filters.push("\"$filtercollection_paramname\"") # add to list to set as default filter %]
+  				[% END %]
+			[% ELSE %]
+  				[% # <span style="font-size: 80%"><i>No visible filters in collection $filtercollection.name</i></span> %]
+			[% END %]
+			</div>
+
+			<!-- this is just a dummy div to prevent the contents of last filter collection from falling out of div - only happens in IE 6 -->
+			<div class="collectionBREAK"></div>
+		[% END %]
+
+		</div>
+		</div>
+    
+	[% END %]
+  
+[% END %]
+
+[% # Finish by printing out all pushaction-info collected in filter.tt, after transforming
+   # the Perl hash to Javascript hash. NB global value defined in TemplateBuilder.pm %]
+<script language="JavaScript" type="text/javascript" >
+//<![CDATA[
+
+// All pushaction-info collected from filter-configs, as one big hash
+var \${param_prefix}pushActionsOfFiltermenu = [% tbuilder.perlhash2js(js_pushactions_of_filtermenu) %];
+
+// Set up list of selected options for pushaction-menus as stored in session. Needed to
+// set the selected option for those menus in the pa-updating function.
+var \${param_prefix}sessionValueOfFiltermenu = [* wq.perlhash2js(js_session_value_of_filtermenu) *];
+
+// Initial update of all pushaction-menus on page load
+  //  foreach menu in big pushaction-info hash
+for(var pa_menuname in \${param_prefix}pushActionsOfFiltermenu) {
+   var pa_menu = document.mainform.elements[pa_menuname];
+   
+   if(pa_menu) {
+	 //  alert("getting pa-info for menu " + pa_menuname + ", obj " + pa_menu);
+      updateMenuPushactions(pa_menu, \${param_prefix}pushActionsOfFiltermenu, \${param_prefix}sessionValueOfFiltermenu);
+   }
+}
+
+
+[* filts_to_check = session.param("\${param_prefix}filtercollections") *]
+[* IF !filts_to_check || filts_to_check == ' ' *]
+	[* filts_to_check = [[% default_filters.join(',') %]]  *]
+[* END *]
+[* tmp_array = [] *]
+[* FOREACH filt = filts_to_check *]
+	[* NEXT IF filt == " " *]
+		[* tmp_array.push("'\$filt' : ''") *]
+[* END *]
+
+//]]>
+</script>
+
+
+<script language="JavaScript" type="text/javascript" >
+	// setting the options of selectMenus to checked 
+	var \${param_prefix}sessionValueOfFiltermenu_1 = [* wq.perlhash2js(js_session_value_of_filtermenu) *];
+	for(var filterCollectionEltName in {
+		[* tmp_array.join(",\n") *]}) 
+	{
+		updateSelectMenu(filterCollectionEltName, \${param_prefix}sessionValueOfFiltermenu_1);
+	}	
+
+</script>
+
+
+<script language="JavaScript" type="text/javascript" >
+// Update summary-tree on side panel according to info stored in the session, defer works for internet explorer OPERATION ABORTED ERROR
+
+	for(var filterCollectionEltName in {
+		[* tmp_array.join(",\n") *]}) 
+	{
+		//alert('Updating filters in fcollection '+filterCollectionEltName);
+   		//enableFiltersInCollection(filterCollectionEltName);
+		//This enableFiltersUpdateSummaryPanel function is not defined anywhere? [why ? It is there in javascript....]
+		enableFiltersUpdateSummaryPanel(filterCollectionEltName);
+	}
+	
+</script>
+
+
+
+</div>
+
+</td>
+</tr>
+</table>
+
+</div>
+

@@ -1,0 +1,52 @@
+[% PROCESS 'header.tt' %]
+<!-- $Id: outputpage.tt,v 1.1.1.1 2006-11-22 20:30:58 arek Exp $ -->
+
+<div id="mart_containerpanel">
+
+<form name="mainform" action="martview" method="post" enctype="multipart/form-data">
+
+<div id="mart_mainpanel">
+
+<div class="mart_main_menubar">
+
+<input type="hidden" name="interface_mode" value="[% session.param('interface_mode') %]" />
+[% PROCESS "wizard_menubar.tt" %]
+
+</div>
+
+<div style="text-align: right; padding: 4px;">
+<input type="hidden" name="prev_stage"    value="filter" />
+<input type="hidden" name="current_stage" value="output" />
+<input type="hidden" name="next_stage"    value="0" />
+<input type="image" name="submit.filter" src="/martview/images/back-on.gif" value="Back" onclick="document.mainform.next_stage.value = 'filter'; document.mainform.submit();" />
+<input type="image" name="submit.export" src="/martview/images/next-on.gif" value="Next" onclick="document.mainform.next_stage.value = 'export'; document.mainform.submit();" />
+</div>
+
+[% # Render menu to select the output page %]
+[% outputpage_menu = 'outputpage_menu_'
+                      _ session.param('schema') _ '.'
+                      _ session.param('dataset') _ '.tt' %]
+[% PROCESS $outputpage_menu %]
+
+[% # Then render one of possibly multiple output pages, depending on config. The default page to
+   # use is set in the template builder class before processing this templage %]
+[% attributepanel = 'attributepanel_'
+                     _ session.param('schema') _ '.'
+                     _ session.param('dataset') _ '.'
+                     _ (session.param('attributepage') || default_attributetree_name) _ '.tt' %]
+[% PROCESS $attributepanel %]
+
+
+</div> <!-- mainpanel closes -->
+
+<div id="mart_summarypanel">
+
+[% PROCESS "summarypanel.tt" %]
+
+</div> <!-- summary panel closes -->
+
+</form>
+
+</div> <!-- martpanel closes -->
+
+[% PROCESS 'footer.tt' %]

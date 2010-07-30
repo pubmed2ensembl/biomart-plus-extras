@@ -1,0 +1,13 @@
+<!-- $Id: wizard_menubar.tt,v 1.1.1.1 2006-11-22 20:30:59 arek Exp $ -->
+
+<input type="image" name="submit.new" src="/martview/images/new-on.gif" value="New" onclick="document.mainform.next_stage.value = 'new'; document.mainform.submit();" />
+<img src="/martview/images/arrow-on.gif" alt="" />
+<input type="image" name="submit.start" src="/martview/images/start-on.gif" value="Start" onclick="document.mainform.next_stage.value = 'start'; document.mainform.submit();" />
+<img src="/martview/images/arrow-on.gif" alt="" />
+<input type="image" name="submit.filter" src="/martview/images/filter-on.gif" value="Filter" onclick="document.mainform.next_stage.value = 'filter'; document.mainform.submit();" />
+<img src="/martview/images/arrow-on.gif" alt="" />
+<input type="image" name="submit.output" src="/martview/images/output-on.gif" value="Output" onclick="document.mainform.next_stage.value = 'output'; document.mainform.submit();" />
+<input type="image" name="submit.export" src="/martview/images/export-on.gif" value="Export" onclick="document.mainform.next_stage.value = 'export'; document.mainform.submit();" />
+
+<a href="#" onclick="document.mainform.interface_mode.value = 'singlepage'; document.mainform.submit();">switch to single-page mode</a>
+

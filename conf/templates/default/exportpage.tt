@@ -1,0 +1,89 @@
+[% PROCESS 'header.tt' %]
+<!-- $Id: exportpage.tt,v 1.1.1.1 2006-11-22 20:30:57 arek Exp $ -->
+
+<div id="mart_containerpanel">
+
+<form name="mainform" action="martview" method="post" enctype="multipart/form-data">
+
+<div id="mart_mainpanel">
+
+<div class="mart_main_menubar">
+
+<input type="hidden" name="interface_mode" value="[% session.param('interface_mode') %]" />
+
+[% IF session.param('interface_mode') == 'singlepage' %]
+  [% PROCESS "singlepage_menubar.tt" %]
+[% ELSIF session.param('interface_mode') == 'wizard' %]
+  [% PROCESS "wizard_menubar.tt" %]
+[% END %]
+
+</div>
+[% IF session.param('interface_mode') == 'wizard' %]
+<div style="text-align: right; padding: 4px;">
+<input type="hidden" name="prev_stage"    value="output" />
+<input type="hidden" name="current_stage" value="export" />
+<input type="hidden" name="next_stage"    value="0" />
+<input type="image" name="submit.output" src="/martview/images/back-on.gif" value="Back" onclick="document.mainform.next_stage.value = 'output'; document.mainform.submit();" />
+</div>
+[% END %]
+
+Show 
+<select name="export_show" onchange="document.mainform.next_stage.value = 'export'; document.mainform.submit();">
+  <option value="5"
+[% IF session.param('export_show').defined() && session.param('export_show') == 5 %]
+ selected="selected"
+[% END %]>5</option>
+  <option value="10"
+[% IF session.param('export_show').defined() && session.param('export_show') == 10 %]
+ selected="selected"
+[% END %]>10</option>
+  <option value="20"
+[% IF !session.param('export_show').defined()
+   || (session.param('export_show').defined() && session.param('export_show') == 20) %]
+ selected="selected"
+[% END %]>20</option>
+  <option value="50"
+[% IF session.param('export_show').defined() && session.param('export_show') == 50 %]
+ selected="selected"
+[% END %]>50</option>
+  <option value="100"
+[% IF session.param('export_show').defined() && session.param('export_show') == 100 %]
+ selected="selected"
+[% END %]>100</option>
+</select>
+per page. 
+Save as
+<select name="export_saveto" onchange="document.mainform.next_stage.value = 'export'; document.mainform.submit();">
+  <option value="" selected="selected">Select format</option>
+  <option value="text">  Text</option>
+  <option value="gz">  gzip(.gz)</option>
+</select>
+<br />
+Items 1-20 of X
+<div>
+[% # Print first few entries via the output-formatter %]
+[% fmtprinter.print_header() %]
+[% i = 1 %]
+[% WHILE fmtprinter.print_next_entry() %]
+  [% BREAK IF i == (session.param('export_show') || 20) %]
+  <tr><td>[% result_table.nextRow().join('</td><td>') %]</td></tr>
+  [% i = i + 1 %]
+
+[% END %]
+[% fmtprinter.print_footer() %]
+
+Items 1-20 of X
+</div>
+</div> <!-- mainpanel closes -->
+
+<div id="mart_summarypanel">
+
+[% PROCESS "summarypanel.tt" %]
+
+</div> <!-- summary panel closes -->
+
+</form>
+
+</div> <!-- martpanel closes -->
+
+[% PROCESS 'footer.tt' %]

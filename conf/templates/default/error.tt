@@ -1,0 +1,17 @@
+[% # $Id: error.tt,v 1.2 2007-05-03 16:21:05 syed Exp $ %]
+
+
+<p>
+[% errmsg %]
+</p>
+
+<p>
+If you repeatedly get directed to this error page, there may be a problem with your
+current session parameters. To clear your session and start with a clean slate, please
+click the <b>New</b> button below.
+</p>
+
+<p>
+[% tracestring %]
+</p>
+

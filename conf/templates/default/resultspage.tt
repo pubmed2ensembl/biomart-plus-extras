@@ -1,0 +1,59 @@
+[% PROCESS 'header.tt' %]
+<!-- $Id: resultspage.tt,v 1.1.1.1 2006-11-22 20:30:58 arek Exp $ -->
+
+<div id="mart_containerpanel">
+
+<form name="mainform" action="martview" method="post" enctype="multipart/form-data">
+
+<div id="mart_main_menubar">
+  <img src="/martview/images/biomart-logo.gif" alt="" />
+</div>
+
+<input type="hidden" name="do_export" value="0" />
+<input type="hidden" name="do_export2resultspage" value="0"/>
+<!--
+<input type="hidden" name="newquery" value="0" /> 
+<input type="hidden" name="do_export" value="0" />
+<input type="hidden" name="savequery" value="0" />
+<input type="hidden" name="export_dataset" value="0" />
+-->
+
+<input type="submit" name="build_query" value="&lt;-Build query" onclick="document.mainform.do_export.value = 0; document.mainform.submit();" />
+
+<div class="mart_export_menubar">
+
+Show 
+<select name="export_subset" onchange="document.mainform.do_export2resultspage.value = 1; document.mainform.do_export.value = 1; document.mainform.submit(); ">
+  <option value="10">10</option>
+  <option value="20" selected="selected">20</option>
+  <option value="50">50</option>
+  <option value="100">100</option>
+  <option value="150">150</option>
+  <option value="200">200</option>
+</select>
+ entries. 
+
+Export all entries to
+<select name="export_saveto">
+  <option value="" selected="selected">--Select destination</option>
+  <option value="text">  Text in browser</option>
+  <option value="file">  Text file</option>
+  <option value="gz">  Compressed text file(.gz)</option>
+</select>
+<input type="submit" name="export_submit" value="Go" onclick="if(this.value != '') { document.mainform.do_export.value = 1; document.mainform.export_dataset.value = '[% session.param('export_dataset') %]'; document.mainform.submit(); } "/>
+</div> <!-- Export menu panel ends -->
+
+<div class="mart_export_data">
+<pre>
+
+[% result_string %]
+
+</pre>
+</div> <!-- Export data section ends -->
+
+
+</form> 
+
+</div> <!-- martpanel closes -->
+
+[% PROCESS 'footer.tt' %]

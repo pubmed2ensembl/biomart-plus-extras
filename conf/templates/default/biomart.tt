@@ -1,0 +1,614 @@
+[% #--------------------------------------------------------------------
+   # Master template for rendering the main part of the web interface. 
+   # This template pulls in various other templates, depending on which
+   # dataset(s) are currently in the query being built.
+   #--------------------------------------------------------------------
+%]
+
+[% USE Number.Format %]
+[% PROCESS 'collapsible_section.tt' %]
+  
+  
+
+	<tr>	
+	<td width="100%" height="5%" align="left">
+	<div style=" width:100%; height:100%; overflow:visible; position: relative;">
+
+        [% PROCESS 'menupanel.tt' %]
+
+	</div>
+	</td>
+	</tr>
+	
+	
+	<!-- GAP betweeb buttonsBar and panels below-->	
+	<tr>
+		<td width="100%" height="1%" align="left">			
+		</td>
+	</tr>
+	
+	
+	<tr>
+	
+	<td width="100%" height="94%" align="left">
+	<div style="width:100%; height:100%; overflow:hidden; align:top; background: white; position: relative;">
+		<table width="100%" height="100%"  border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed;">
+		<tr>
+		<td class="mart_tableSummaryPanel" height="100%" width="25%" align="left" valign="top">
+			<div id="summaryPanelDiv" class="mart_summarypanel_datasets" style="height:100%; overflow: auto; text-align: top; position:relative; display:
+				[% IF session.param('newQuery') &&  session.param('newQuery') == "1" %] none;">
+				[% ELSE %] block;"> [% END %]
+			
+
+				<table width="100%" height="100%"  border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed;">
+				<tr>
+				<td width="100%" height="100%" valign="top" align="left">
+				
+					[% PROCESS 'summarypanel.tt' %]
+					
+				</td>
+				</tr>
+				</table>
+			</div> <!-- summary box closes -->	
+			<div id="summaryPanelDiv_empty" style="display:
+				[% IF session.param('newQuery') &&  session.param('newQuery') == "1" %] block;">
+				[% ELSE %] none;"> [% END %]
+			
+				<table class="mart_summarypanel_listheaderTable" width="100%" border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed; margin: 16px 0px 0px 0px;">
+				<tr> <td> <span class="mart_summarypanel_listheader_Empty" id=""> Dataset </span>	</td>	</tr>
+				</table> 	<div  class="mart_summarypanel_listitem2">	[None selected]</div>
+			</div>
+		</td>
+	
+	<td class="mart_tableMainPanel" height="100%" width="85%" valign="top" align="left">
+
+					
+			<input type="hidden" name="menuNumber" value="0" />
+			<input type="hidden" name="newsession" value="0" />
+			<input type="hidden" name="do_export" value="0" />
+			<input type="hidden" name="do_export2resultspage" />
+			<input type="hidden" name="savequery" value="0" />
+			<input type="hidden" name="showquery" value="0" />
+			<input type="hidden" name="countButton" value="0" />
+			<input type="hidden" name="resultsButton" value="0" />
+			<input type="hidden" name="reverseName" value="[% reverseNAME %]" />
+			<input type="hidden" name="summarypanel_filter_count_1_hidden" value="[%session.param('ds_1_count')%]" />
+			<input type="hidden" name="summarypanel_filter_count_2_hidden" value="[%session.param('ds_2_count')%]" />
+			<input type="hidden" name="track_visible_section" value="0" />
+			<input type="hidden" name="export_dataset" value="[% session.param('export_dataset') || 0 %]" />
+			<input type="hidden" name="formatterMenu" value="[% session.param('formatterMenuInvoked') %]" />
+			<input type="hidden" name="newQueryValue" value="[% session.param('newQuery') %]" />
+			<input type="hidden" name="uniqueRowsPreView" value="[% session.param('uniqueRowsPreView') %]" />
+			<input type="hidden" name="uniqueRowsExportView" value="[% session.param('uniqueRowsExportView') %]" />
+			<input type="hidden" name="showAll" value="0" />
+			<input type="hidden" name="schemaName" value="[% session.param('schema') %]" />
+			
+			<input type="hidden" name="mart_mainpanel__current_visible_section" value="[% session.param('mart_mainpanel__current_visible_section') %]"/>
+			<input type="hidden" name="summarypanel__current_highlighted_branch" value="[% session.param('summarypanel__current_highlighted_branch') %]"/>
+			
+			<div id="mart_mainpanel" style="height:100%; overflow:hidden; text-align: top; position: relative;">
+			<table width="100%" height="100%"  border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed;">
+			<tr>
+			<td id="mart_mainpanel" width="100%" height="100%" valign="top" align="left">	
+	[% IF session.param('newQuery') &&  session.param('newQuery') == "1" %]
+		[% PROCESS 'datasetpanel.tt' %]
+	[% ELSE %]
+		
+		[% IF session.param("dataset").size >= 1 %]
+
+		[% # Set the default visible-section ID, if it's not already set in the session. Also set the branch 
+   		   # in the summary-tree which should be highlighted along with it. %]
+		[% IF !session.param("mart_mainpanel__current_visible_section") %]
+    		[% # || session.param("mart_mainpanel__current_visible_section") == 'add_linked_datasetpanel' %]
+  			[% first_dset_name = session.param("dataset").first() %]
+  			[% infoPanel = "${datasetOBJ.name}" _ "__infopanel" %]
+  			[% summaryPanel = "${datasetOBJ.name}" _ "__summarypanel_datasetbranch" %]
+
+  			[% foo = session.param("mart_mainpanel__current_visible_section", "${infoPanel}" ) %]
+  			[% bar = session.param("summarypanel__current_highlighted_branch", "${summaryPanel}" ) %]
+		[% END %]
+
+		[% # Show linked dataset menu, but only if we have a single dataset by now (NEEDS MODS TO HANDLE >2 dsets!!!) %]
+		[% IF session.param('dataset').size == 1 %]
+			<div id="add_linked_datasetpanel" style="display: none;">
+				[% PROCESS "linked_datasets_menu.tt" %]
+			</div>
+		[% END %]	
+
+		[% # Foreach datasets currently configured, render filter & attributepanel for it. Note that 
+   		# only one panel is shown at a given time, the others (if any) are hidden from user. %]
+		[% default_attributepage_for_export %]
+		[% all_attributepages = [] %]
+		[% dset_count = 0 %]
+
+		[% FOREACH dset_name = session.param('dataset') %]
+			[% dset = wq.get_mart_registry().getDatasetByName(session.param("schema"), dset_name) %]
+			[% dset_count = dset_count + 1 %]
+
+			[% # Render small panel with info on this dataset (schema, database and such). The startup
+   			# panel of schema/database/dataset is displayed for the first dataset, the linked dataset
+   			# panel is shown for the other datasets. %]
+			<div id="[% dset_name %]__infopanel" style="display: none;">
+				[% dataset = dset %]
+				[% IF dset_count == 1 %]
+  					[% PROCESS "datasetpanel.tt" %]
+				[% ELSE %]
+  					[% PROCESS "linked_datasets_menu.tt" %]
+				[% END %]
+
+			</div>
+
+
+				[% vs_param_prefix = session.param('schema') %]
+				[% param_prefix = dset_name _ '__' %]
+				[% vs_param_prefix = vs_param_prefix _ '____' _ dset_name _ '__' %]
+				[% # Render pre-generated attributepanel for this dataset %]
+				[% attributepanel = 'attributepanel_'
+	                  		_ session.param('schema') _ '.'
+                     		_ dset_name _ '.tt' %]
+				<!-- [% attributepanel %] -->
+				[% PROCESS $attributepanel %]
+				
+			
+				[% # Render pre-generated filterpanel for this dataset %]
+				[% filterpanel = 'filterpanel_'
+                  		_ session.param('schema') _ '.'
+                  		_ dset_name _ "\.tt" %]
+				<!-- [% filterpanel %] -->
+				[% PROCESS $filterpanel %]
+
+		[% END %]
+
+
+			<div id="resultspanel" style="display: none; width:100%; height:100%; overflow:hidden; position: relative;">
+			<table width="100%" height="100%"  border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed;">
+			<tr>
+			<td width="100%" height="20%" valign="top" align="left">
+				<div id="mart_export_menubar" style="width:100%; height:110px; overflow:auto;" >
+
+				<table width="100%" height="100%" border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed;">
+				
+				<tr>
+				<td align="left" width="25%" valign="top">
+					&nbsp;Export &nbsp;all results to&nbsp;&nbsp;
+				</td>
+				<td align="left" width="75%" valign="top">
+						<select name="export_saveto"
+								class="mart_input"
+								onmouseover="this.className='mart_input mart_inputhov'" 
+								onmouseout="this.className='mart_input'"
+
+								onchange="
+								var exportOpt = document.mainform.export_saveto.options[document.mainform.export_saveto.selectedIndex].value;
+								if (exportOpt=='file_bg' || exportOpt=='gz_bg') {
+									document.mainform.background_email.disabled = '';
+								} else {
+									document.mainform.background_email.disabled = 'true';
+								}
+								">
+  							[% IF !session.param("GALAXY_URL") %]
+								<option value="file">File</option>	
+  								<!--	<option value="text">Browser</option> -->
+	  							<option value="gz">Compressed file (.gz)</option>
+  								[% IF session.param("__enable_background")==1 %]
+  									<!-- <option value="file_bg">Web File (notify by email)</option> -->
+	  								<option value="gz_bg">Compressed web file (notify by email)</option>
+	  							[% END %]
+ 							[% ELSE %]
+  								<option value="text">Galaxy</option>
+  							[% END %]
+						</select>
+						
+						<select name="exportView_outputformat" 
+							class="mart_input"
+							onmouseover="this.className='mart_input mart_inputhov'" 
+							onmouseout="this.className='mart_input'"
+			
+							onchange=""
+						>
+					
+						[% IF session.param("GALAXY_URL") %]
+							<option value="tsv">TSV</option>
+						[% ELSE %]
+						[% FOREACH outputformat = session.param("export_outputformats") %]
+	
+  							[% IF outputformat != "txt" %]
+  							<option value="$outputformat"
+								[% IF session.param("exportView_outputformat").defined() && session.param("exportView_outputformat") == outputformat %]
+ 									selected="selected"
+								[% END %]
+								[% IF !session.param("exportView_outputformat") &&  outputformat == "tsv" %]
+										selected="selected"
+								[% END %]
+							>[% outputformat FILTER upper %]
+							</option>
+							[% END %]
+
+						[% END %]
+						[% END %]
+
+						</select>
+						
+						<input type="checkbox" id="uniqueCBoxExportView"
+						
+							[% IF session.param('uniqueRowsExportView') == "1" %]
+								checked
+							[% END %]
+							onchange="
+								if(this.checked) {
+									document.mainform.uniqueRowsExportView.value = 1;
+								}
+								else {
+									document.mainform.uniqueRowsExportView.value = 0;
+								}
+							"
+						/> Unique results only &nbsp
+						
+						<input type="submit" name="export_submit" value="Go" 
+							class="mart_btn_go"
+							onmouseover="this.className='mart_btn_go mart_btnhov_go'" 
+							onmouseout="this.className='mart_btn_go'"
+
+							onclick="
+							if(this.value != '') 
+							{
+								[% IF session.param("GALAXY_URL") %]
+								[% dset = wq.get_mart_registry().getDatasetByName(session.param("schema"), dset_name) %]
+								document.mainform.action = 
+									'[% session.param("GALAXY_URL") %]'+
+									'?type=text'+
+									'&name=[% dset.displayName() || dset_name %]'+
+									'&URL=http://'+location.host+'[% form_action %]?do_export=1&resultsButton=1';
+								[% END %]
+								document.mainform.showAll.value = 0;
+								document.mainform.formatterMenu.value = 'exportView';
+								document.mainform.do_export.value = 1; 
+								document.mainform.showquery.value = 0; 
+								document.mainform.savequery.value = 0;  
+								var okToSub = 1;
+								var exportOpt = document.mainform.export_saveto.options[document.mainform.export_saveto.selectedIndex].value;
+								if (exportOpt=='file_bg' || exportOpt=='gz_bg') {
+									if (document.mainform.background_email.value=='') {
+								   		alert('You need to specify an email address for background jobs.');
+								   		okToSub = 0;
+								   }
+								   if (okToSub==1) { 
+										document.getElementById('resultsTableId').innerHTML = 'Loading... ';
+										addLoadingImage('resultsTableId', '[% TAG_path %]');
+
+										var summaryCountElt1 = document.getElementById('summarypanel_filter_count_1');
+										if (summaryCountElt1)
+										{
+											document.mainform.summarypanel_filter_count_1_hidden.value = summaryCountElt1.innerHTML;
+										}
+										var summaryCountElt2 = document.getElementById('summarypanel_filter_count_2');
+										if (summaryCountElt2)
+										{
+											document.mainform.summarypanel_filter_count_2_hidden.value = summaryCountElt2.innerHTML;
+										}
+
+										document.mainform.track_visible_section.value = 
+											document.mainform['mart_mainpanel__current_visible_section'].value;
+	
+										document.mainform['mart_mainpanel__current_visible_section'].value = 'resultspanel'; 
+										document.mainform['summarypanel__current_highlighted_branch'].value = 'show_results'; 
+
+										document.mainform.resultsButton.value = 5;
+										document.mainform.target = 'results_hiddenIFrame';
+										document.mainform.submit();
+			
+										document.mainform.resultsButton.value = 1;
+								 	
+									} 
+								} 
+								else {
+								   [% IF session.param("GALAXY_URL") %]
+								   	document.mainform.target = '_self';
+								   [% ELSE %]
+ 	 								   document.mainform.target = 'newwindow';
+ 	 								[% END %]
+ 	 								document.mainform.resultsButton.value = 1;
+								   document.mainform.submit();
+								}
+								
+								return false;
+							}							
+							
+							"/>
+							
+							
+							
+					</td>
+					
+					</tr>
+				
+					<tr>
+					<td align="left" width="25%" valign="top">
+							&nbsp;Email notification to&nbsp;&nbsp;
+					</td>
+				
+					<td align="left" width="75%" valign="top">
+						<div id="__email_section" class="email_notification">
+							<input type="text" disabled name="background_email" value="[% session.param("background_email") %]"
+								class="mart_input"
+								onmouseover="this.className='mart_input mart_inputhov'" 
+								onmouseout="this.className='mart_input'"
+							/>
+						</div>
+					</td>
+
+					</tr>
+						
+					
+					
+				<tr class="mart_viewPanel">
+					<td align="left" width="" valign="top">
+						<div style="border-width: 0px 0px 1px 0px; border-style: solid; border-color: black; margin: 0px 0px 6px 0px;"> </div>
+					</td>
+					<td align="left" width="" valign="top">
+						<div style="border-width: 0px 0px 1px 0px; border-style: solid; border-color: black; margin: 0px 0px 6px 0px;"> </div>
+					</td>
+				</tr>
+
+				<tr class="mart_viewPanel">
+				<td align="left" width="25%" valign="top">
+						&nbsp;View&nbsp;&nbsp;
+				</td>
+				<td align="left" width="75%" valign="top">
+					<select name="export_subset" 
+					class="mart_input"
+					onmouseover="this.className='mart_input mart_inputhov'" 
+					onmouseout="this.className='mart_input'"
+
+					onchange="
+						
+					var summaryCountElt1 = document.getElementById('summarypanel_filter_count_1');
+					if (summaryCountElt1)
+					{				
+						document.mainform.summarypanel_filter_count_1_hidden.value = summaryCountElt1.innerHTML;
+					}
+					var summaryCountElt2 = document.getElementById('summarypanel_filter_count_2');
+					if (summaryCountElt2)
+					{
+						document.mainform.summarypanel_filter_count_2_hidden.value = summaryCountElt2.innerHTML;
+					}
+
+					document.mainform.savequery.value = 0; 
+					document.mainform.showquery.value = 0; 
+
+					if(this.value == 'All' )
+					{
+						document.mainform.showAll.value = 1;
+						document.mainform.do_export.value = 1;
+						document.mainform.formatterMenu.value = 'preView';
+						document.mainform.target = 'newwindow';
+						document.mainform.resultsButton.value = 1;
+						document.mainform.submit();
+					}
+					else
+					{
+						document.mainform.do_export.value = 0;
+						document.getElementById('resultsTableId').innerHTML = 'Loading... ';
+						addLoadingImage('resultsTableId', '[% TAG_path %]');
+						document.mainform.formatterMenu.value = 'preView';
+							
+						showPanelHideSiblings('resultspanel');
+						setHighlightedSummaryPanelBranch('show_results');					
+						document.mainform.track_visible_section.value = document.mainform['mart_mainpanel__current_visible_section'].value;
+						document.mainform['mart_mainpanel__current_visible_section'].value = 'resultspanel'; 
+						document.mainform['summarypanel__current_highlighted_branch'].value = 'show_results'; 
+
+						document.mainform.resultsButton.value = 5;
+						document.mainform.target = 'results_hiddenIFrame';
+						document.mainform.submit();
+						document.mainform.resultsButton.value = 1;
+					}
+									
+					">
+
+					[% FOREACH c = [10,20,50,100,150,200, 'All'] %]
+  						<option value="$c"
+						[% IF session.param("export_subset").defined() && session.param("export_subset") == c %]
+							selected="selected"
+						[% END %]>$c</option>
+
+					[% END %]
+
+					</select>
+ 					rows as 
+					<select name="preView_outputformat" 
+					class="mart_input"
+					onmouseover="this.className='mart_input mart_inputhov'" 
+					onmouseout="this.className='mart_input'"
+				
+					onchange="
+											
+						var summaryCountElt1 = document.getElementById('summarypanel_filter_count_1');
+						if (summaryCountElt1)
+						{				
+							document.mainform.summarypanel_filter_count_1_hidden.value = summaryCountElt1.innerHTML;
+						}
+						var summaryCountElt2 = document.getElementById('summarypanel_filter_count_2');
+						if (summaryCountElt2)
+						{
+							document.mainform.summarypanel_filter_count_2_hidden.value = summaryCountElt2.innerHTML;
+						}
+						
+						document.mainform.savequery.value = 0;  
+						document.mainform.showquery.value = 0; 
+						
+						var seeAll = document.mainform.export_subset.options[document.mainform.export_subset.selectedIndex].value;
+						if(seeAll == 'All')
+						{
+							document.mainform.showAll.value = 1;
+							document.mainform.do_export.value = 1; 
+							document.mainform.formatterMenu.value = 'preView';
+							document.mainform.target = 'newwindow';
+							document.mainform.resultsButton.value = 1;
+							document.mainform.submit();
+						}
+						else
+						{
+							document.mainform.do_export.value = 0;
+							document.getElementById('resultsTableId').innerHTML = 'Loading... ';
+							addLoadingImage('resultsTableId', '[% TAG_path %]');									
+							document.mainform.formatterMenu.value = 'preView';
+							
+							showPanelHideSiblings('resultspanel');
+							setHighlightedSummaryPanelBranch('show_results');
+							document.mainform.track_visible_section.value = document.mainform['mart_mainpanel__current_visible_section'].value;
+							document.mainform['mart_mainpanel__current_visible_section'].value = 'resultspanel'; 
+							document.mainform['summarypanel__current_highlighted_branch'].value = 'show_results';
+							
+							document.mainform.resultsButton.value = 5;
+							document.mainform.target = 'results_hiddenIFrame';
+							document.mainform.submit();
+							document.mainform.resultsButton.value = 1;
+						}						
+												
+						
+						
+						">
+					
+					[% IF session.param("GALAXY_URL") %]
+						<option value="tsv">TSV</option>
+					[% ELSE %]
+					[% FOREACH outputformat = session.param("export_outputformats") %]
+
+  						[% IF outputformat != "txt" &&  outputformat != "xls" %]
+  						<option value="$outputformat"
+							[% IF session.param("preView_outputformat").defined() && session.param("preView_outputformat") == outputformat %]
+ 								selected="selected"	
+							[% END %]>[% outputformat FILTER upper %]
+						</option>
+						[% END %]
+
+					[% END %]
+					[% END %]
+
+					</select>
+					
+					<input type="checkbox" id="uniqueCBoxPreView"
+						
+							[% IF session.param('uniqueRowsPreView') == "1" %]
+								checked
+							[% END %]
+						onclick="
+						if(this.checked) {
+							document.mainform.uniqueRowsPreView.value = 1;									
+						}
+						else {
+							document.mainform.uniqueRowsPreView.value = 0;
+						}
+						var summaryCountElt1 = document.getElementById('summarypanel_filter_count_1');
+						if (summaryCountElt1)
+						{				
+							document.mainform.summarypanel_filter_count_1_hidden.value = summaryCountElt1.innerHTML;
+						}
+						var summaryCountElt2 = document.getElementById('summarypanel_filter_count_2');
+						if (summaryCountElt2)
+						{
+							document.mainform.summarypanel_filter_count_2_hidden.value = summaryCountElt2.innerHTML;
+						}
+						
+						document.mainform.savequery.value = 0;  
+						document.mainform.showquery.value = 0; 
+						
+						var seeAll = document.mainform.export_subset.options[document.mainform.export_subset.selectedIndex].value;
+						if(seeAll == 'All')
+						{
+							document.mainform.showAll.value = 1;						
+							document.mainform.do_export.value = 1; 
+							document.mainform.formatterMenu.value = 'preView';
+							document.mainform.target = 'newwindow';
+							document.mainform.resultsButton.value = 1;
+							document.mainform.submit();
+						}
+						else
+						{
+							document.mainform.do_export.value = 0;
+							document.getElementById('resultsTableId').innerHTML = 'Loading... ';
+							addLoadingImage('resultsTableId', '[% TAG_path %]');											
+							document.mainform.formatterMenu.value = 'preView';
+							
+							showPanelHideSiblings('resultspanel');
+							setHighlightedSummaryPanelBranch('show_results');
+							document.mainform.track_visible_section.value = document.mainform['mart_mainpanel__current_visible_section'].value;
+							document.mainform['mart_mainpanel__current_visible_section'].value = 'resultspanel'; 
+							document.mainform['summarypanel__current_highlighted_branch'].value = 'show_results';
+							
+							document.mainform.resultsButton.value = 5;
+							document.mainform.target = 'results_hiddenIFrame';
+							document.mainform.submit();
+							document.mainform.resultsButton.value = 1;
+						}
+							"
+						/> Unique results only
+					
+				</td>
+				</tr>
+
+				</table>		
+				</div>
+			
+			</td>
+			</tr>
+
+
+			<tr>
+			<td width="100%" height="100%" valign="top" align="left">
+				<div id = "mart_export_data" style="width:100%; height:99%;  overflow:auto;" >
+					<table width="100%" height="100%" border="0" cellpadding="" cellspacing="0" style="table-layout: auto; ">
+					<tr>
+					<td id="resultsTableId" width="100%" height="100%" valign="top" align="left" >
+						[% # this is now loaded via AJAX the below is for default results incase of URL Requests %]
+						[% result_string %]
+					</td>
+					</tr>
+					</table>
+				</div>
+				
+			</td>
+			</tr>
+			</table>
+		
+			</div>
+		
+		<script language="JavaScript" type="text/javascript" >
+		//<![CDATA[
+		// Various startup/initialization related things for the main panel and
+		// the summary panel.
+		// Set the proper section to visible-status on the main panel
+		
+			showPanelHideSiblings('[% session.param("mart_mainpanel__current_visible_section") %]');
+			setHighlightedSummaryPanelBranch('[% session.param("summarypanel__current_highlighted_branch") %]');
+
+		//]]>
+		</script>
+
+	[% ELSE %]
+  		[% # If no datasets are selected yet, show the full dataset-selection menu section with
+     		# the default dataset pre-selected %]
+  		[% PROCESS "datasetpanel.tt" %]
+	[% END %]
+
+		[% END %]
+			</td>
+			</tr>
+			</table>
+			</div>
+
+
+		</td>
+		</tr>
+		</table>
+		
+	</div>
+	</td>
+	</tr>
+	
+	<tr>
+		<td align="left" height="0%" valign="top">
+		<div style="border-width: 0px 0px 1px 0px; border-style: solid; border-color: black;"> </div>
+		</td>
+	</tr>

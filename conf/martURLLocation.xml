@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MartRegistry>
+<MartRegistry>
+
+
+<MartURLLocation
+                    name         = "msd"
+                    displayName  = "My BioMart Database"
+                    host         = "www.biomart.org"
+                    port         = "80"
+                    visible      = "1"
+                    default      = ""
+                     includeDatasets = ""
+                    martUser     = ""
+/>
+</MartRegistry>
+
+

@@ -1,0 +1,135 @@
+====== URL BASED QUERY FORMAT
+
+?VIRTUALSCHEMANAME=<VSName>
+&ATTRIBUTES=<datasetInternalName>.<Interface>.<AttributePageInternalName>.<AtrributeInternalName>."<OPTIONAL: comma separated list of values-this deals with attributeFilters such upstream downstream Sequence Flanks>"
+&FILTERS=<datasetInternalName>.<Interface>.<FilterPageInternalName>.<FilterInternalName>."<comma separated list of filter Values>"
+&VISIBLEPANEL=<mainpanel,attributepanel,filterpanel,linkpanel,linkattributepanel,linkfilterpanel,results>
+====== NOTES
+
+- All params must be supplied unless they are OPTIONAL.
+- &FILTERS: is OPTIONAL
+- When using FilterInternalName for Container type filters 
+	e.g DropDownMenu with Only/exculded choice  [ENSEMBL HUMAN ID LIST FILTERS]
+	OR DropDownMenu with TEXTField for values   [ENSEMBL HUMAN ID list limit]
+	the FilterInternalName should be the internalName of option in dropdown and 
+	value in double quotes would be internal name only/excluded OR any value
+	should you wish to appear in text field. This is just as in XML based queries.
+- incase you don't have a virtualSchema in registry, the use default
+- incase yow don't have any interface for a dataset use default
+- &VISIBLEPANEL: is OPTIONAL
+	the default value is results if left out. other possible values are stated above.
+
+
+======= EXAMPLES
+
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.pdb_id&FILTERS=msd.default.filters.experiment_type."Electron diffraction,Electron microscopy"
+
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.pdb_id&FILTERS=msd.default.filters.experiment_type."Fibre diffraction (electron)"
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.pdb_id&FILTERS=msd.default.filters.pdb_id_list."11ba, 103d, 103l"
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.pdb_id|msd.default.feature_page.experiment_type|msd.default.feature_page.assembly_code&FILTERS=msd.default.filters.experiment_type."Electron diffraction,Electron microscopy"
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=hsapiens_gene_ensembl.default.feature_page.strand|hsapiens_gene_ensembl.default.feature_page.ensembl_gene_id&FILTERS=hsapiens_gene_ensembl.default.filters.chromosome_name."4"
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=mmusculus_gene_ensembl.default.feature_page.strand|mmusculus_gene_ensembl.default.feature_page.ensembl_gene_id&FILTERS=mmusculus_gene_ensembl.default.filters.chromosome_name."Y"
+
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.assembly_code|hsapiens_gene_ensembl.default.structure.struct_biotype|msd.default.feature_page.pdb_id|hsapiens_gene_ensembl.default.structure.exon_stable_id|hsapiens_gene_ensembl.default.structure.gene_stable_id|msd.default.feature_page.experiment_type&FILTERS=msd.default.filters.experiment_type."Electron diffraction,Electron microscopy"
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.assembly_code|hsapiens_gene_ensembl.default.feature_page.strand|msd.default.feature_page.pdb_id|hsapiens_gene_ensembl.default.feature_page.ensembl_gene_id|msd.default.feature_page.experiment_type&FILTERS=msd.default.filters.experiment_type."Electron diffraction,Electron microscopy"|hsapiens_gene_ensembl.default.filters.chromosome_name."4"
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=uniprot.default.feature_page.protein_name|msd.default.feature_page.pdb_id|uniprot.default.feature_page.sptr_ac&FILTERS=msd.default.filters.experiment_type."Electron diffraction,Electron microscopy"|uniprot.default.filters.superregnum_name."bacteria"
+
+------------- with AttributeFilters Upstream downstream flanks
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.assembly_code|hsapiens_gene_ensembl.default.sequences.gene_flank|hsapiens_gene_ensembl.default.sequences.upstream_flank."140"|msd.default.feature_page.pdb_id|hsapiens_gene_ensembl.default.sequences.struct_biotype|hsapiens_gene_ensembl.default.sequences.gene_stable_id|msd.default.feature_page.experiment_type
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=hsapiens_gene_ensembl.default.sequences.gene_flank|msd.default.feature_page.assembly_code|hsapiens_gene_ensembl.default.sequences.upstream_flank."140"|msd.default.feature_page.pdb_id|hsapiens_gene_ensembl.default.sequences.struct_biotype|hsapiens_gene_ensembl.default.sequences.gene_stable_id|msd.default.feature_page.experiment_type&FILTERS=hsapiens_gene_ensembl.default.filters.chromosome_name."4"
+
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.assembly_code|hsapiens_gene_ensembl.default.sequences.cdna|hsapiens_gene_ensembl.default.sequences.exon_stable_id|hsapiens_gene_ensembl.default.sequences.gene_stable_id
+
+
+------------- with peptide
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.assembly_code|hsapiens_gene_ensembl.default.sequences.peptide|msd.default.feature_page.pdb_id|hsapiens_gene_ensembl.default.sequences.exon_stable_id|hsapiens_gene_ensembl.default.sequences.gene_stable_id
+
+
+Queries with CONTAINER TYPE FILTERS filter
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=hsapiens_gene_ensembl.default.feature_page.strand|hsapiens_gene_ensembl.default.feature_page.ensembl_gene_id&FILTERS=hsapiens_gene_ensembl.default.filters.with_ccds."only"
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=hsapiens_gene_ensembl.default.feature_page.strand|hsapiens_gene_ensembl.default.feature_page.ensembl_gene_id&FILTERS=hsapiens_gene_ensembl.default.filters.with_ipi."only"
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=hsapiens_gene_ensembl.default.feature_page.strand|hsapiens_gene_ensembl.default.feature_page.ensembl_gene_id&FILTERS=hsapiens_gene_ensembl.default.filters.with_ipi."excluded"|hsapiens_gene_ensembl.default.filters.chromosome_name."4"
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=hsapiens_gene_ensembl.default.feature_page.strand|hsapiens_gene_ensembl.default.feature_page.ensembl_gene_id&FILTERS=hsapiens_gene_ensembl.default.filters.biotype."miRNA,Mt_rRNA"
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=hsapiens_gene_ensembl.default.feature_page.strand|hsapiens_gene_ensembl.default.feature_page.ensembl_gene_id&FILTERS=hsapiens_gene_ensembl.default.filters.band_start."p36.33"|hsapiens_gene_ensembl.default.filters.band_end."p31.3"
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=hsapiens_gene_ensembl.default.feature_page.strand|hsapiens_gene_ensembl.default.feature_page.ensembl_gene_id&FILTERS=hsapiens_gene_ensembl.default.filters.encode_region."16:1:500000"
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=hsapiens_gene_ensembl.default.feature_page.strand|hsapiens_gene_ensembl.default.feature_page.ensembl_gene_id
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=hsapiens_gene_ensembl.default.feature_page.strand|hsapiens_gene_ensembl.default.feature_page.ensembl_gene_id&FILTERS=hsapiens_gene_ensembl.default.filters.chromosome_name."Y"
+
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=hsapiens_gene_ensembl.default.feature_page.strand|hsapiens_gene_ensembl.default.feature_page.ensembl_gene_id&FILTERS=hsapiens_gene_ensembl.default.filters.start."4000"
+
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=hsapiens_gene_ensembl.default.feature_page.strand|hsapiens_gene_ensembl.default.feature_page.ensembl_gene_id&FILTERS=hsapiens_gene_ensembl.default.filters.chromosome_name."4"
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=hsapiens_gene_ensembl.default.feature_page.strand|hsapiens_gene_ensembl.default.feature_page.ensembl_gene_id&FILTERS=hsapiens_gene_ensembl.default.filters.pathology_term."neoplasia"
+
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=hsapiens_gene_ensembl.default.feature_page.strand|hsapiens_gene_ensembl.default.feature_page.ensembl_gene_id&FILTERS=hsapiens_gene_ensembl.default.filters.pathology_term."neoplasia"|hsapiens_gene_ensembl.default.filters.chromosome_name."4"
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=hsapiens_gene_ensembl.default.feature_page.strand|hsapiens_gene_ensembl.default.feature_page.ensembl_gene_id|msd.default.feature_page.assembly_code&FILTERS=hsapiens_gene_ensembl.default.filters.chromosome_name."4"|msd.default.filters.has_cath."only"
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.assembly_code|hsapiens_gene_ensembl.default.feature_page.strand|hsapiens_gene_ensembl.default.feature_page.ensembl_gene_id&FILTERS=hsapiens_gene_ensembl.default.filters.chromosome_name."4"|msd.default.filters.has_cath."only"
+
+
+=========== PRIDE MART Examples
+e.g 1 attribute
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=pride.default.pride_attributes.sample_name
+
+e.g 1 attribute
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=pride.default.pride_attributes.sample_name|pride.default.pride_attributes.project_name
+
+e.g 2 attributes, 1 filter
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=pride.default.pride_attributes.sample_name|pride.default.pride_attributes.project_name&FILTERS=pride.default.filters.submitted_accession_option."IPI00216722"
+
+e.g 2 attributes, 1 filter with multiple vals
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=pride.default.pride_attributes.sample_name|pride.default.pride_attributes.project_name&FILTERS=pride.default.filters.tissue_filter."brain,HeLa cell,blood plasma"
+
+e.g 2 attributes, 2 filters whereby 1 with single value and 1 with multiple vals
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=pride.default.pride_attributes.sample_name|pride.default.pride_attributes.project_name&FILTERS=pride.default.filters.tissue_filter."brain,HeLa cell,blood plasma"|pride.default.filters.submitted_accession_option."IPI00216722"
+
+=========== SETTING VISIBLEPANEL
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.pdb_id&FILTERS=msd.default.filters.experiment_type."Electron microscopy"&VISIBLEPANEL=mainpanel
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.pdb_id&FILTERS=msd.default.filters.experiment_type."Electron microscopy"&VISIBLEPANEL=filterpanel
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.pdb_id&FILTERS=msd.default.filters.experiment_type."Electron microscopy"&VISIBLEPANEL=attributepanel
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.pdb_id&FILTERS=msd.default.filters.experiment_type."Electron microscopy"&VISIBLEPANEL=results
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.assembly_code|hsapiens_gene_ensembl.default.structure.struct_biotype|msd.default.feature_page.pdb_id|hsapiens_gene_ensembl.default.structure.exon_stable_id|hsapiens_gene_ensembl.default.structure.gene_stable_id|msd.default.feature_page.experiment_type&FILTERS=msd.default.filters.experiment_type."Electron diffraction,Electron microscopy"&VISIBLEPANEL=mainpanel
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.assembly_code|hsapiens_gene_ensembl.default.structure.struct_biotype|msd.default.feature_page.pdb_id|hsapiens_gene_ensembl.default.structure.exon_stable_id|hsapiens_gene_ensembl.default.structure.gene_stable_id|msd.default.feature_page.experiment_type&FILTERS=msd.default.filters.experiment_type."Electron diffraction,Electron microscopy"&VISIBLEPANEL=attributepanel
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.assembly_code|hsapiens_gene_ensembl.default.structure.struct_biotype|msd.default.feature_page.pdb_id|hsapiens_gene_ensembl.default.structure.exon_stable_id|hsapiens_gene_ensembl.default.structure.gene_stable_id|msd.default.feature_page.experiment_type&FILTERS=msd.default.filters.experiment_type."Electron diffraction,Electron microscopy"&VISIBLEPANEL=filterpanel
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.assembly_code|hsapiens_gene_ensembl.default.structure.struct_biotype|msd.default.feature_page.pdb_id|hsapiens_gene_ensembl.default.structure.exon_stable_id|hsapiens_gene_ensembl.default.structure.gene_stable_id|msd.default.feature_page.experiment_type&FILTERS=msd.default.filters.experiment_type."Electron diffraction,Electron microscopy"&VISIBLEPANEL=linkpanel
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.assembly_code|hsapiens_gene_ensembl.default.structure.struct_biotype|msd.default.feature_page.pdb_id|hsapiens_gene_ensembl.default.structure.exon_stable_id|hsapiens_gene_ensembl.default.structure.gene_stable_id|msd.default.feature_page.experiment_type&FILTERS=msd.default.filters.experiment_type."Electron diffraction,Electron microscopy"&VISIBLEPANEL=linkattributepanel
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=msd.default.feature_page.assembly_code|hsapiens_gene_ensembl.default.structure.struct_biotype|msd.default.feature_page.pdb_id|hsapiens_gene_ensembl.default.structure.exon_stable_id|hsapiens_gene_ensembl.default.structure.gene_stable_id|msd.default.feature_page.experiment_type&FILTERS=msd.default.filters.experiment_type."Electron diffraction,Electron microscopy"&VISIBLEPANEL=linkfilterpanel
+
+
+=========== EXCEPTIONS TESTING - delibrate breaking
+
+?ATTRIBUTES=hsapiens_gene_ensembl.default.feature_page.strand|hsapiens_gene_ensembl3.default.feature_page.ensembl_gene_id|hsapiens_gene_ensembl2.default.feature_page.ensembl_gene_id&FILTERS=hsapiens_gene_ensembl.default.filters.encode_region."16:1:500000"
+
+
+?VIRTUALSCHEMANAME=default&ATTRIBUTES=hsapiens_gene_ensembl.default.feature_page.strand|hsapiens_gene_ensembl3.default.feature_page.ensembl_gene_id|hsapiens_gene_ensembl2.default.feature_page.ensembl_gene_id&FILTERS=hsapiens_gene_ensembl.default.filters.encode_region."16:1:500000"

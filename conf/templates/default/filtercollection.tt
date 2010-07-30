@@ -1,0 +1,22 @@
+[% # $Id: filtercollection.tt,v 1.1.1.1 2006-11-22 20:30:58 arek Exp $  %]
+
+[% # Macro for rendering filtercollection checkbox and name. %]
+[% MACRO render_filtercollection_checkbox(filter, filtercollection) BLOCK %]
+[% filtercollection_paramname = "\${param_prefix}filtercollection." _ filtercollection.name %]
+  <input type="checkbox" name="[% filtercollection_paramname %]" value="on" 
+[* IF session.param("[% filtercollection_paramname %]") == 'on' *]
+checked="checked"
+[* END *]
+ 	onclick = "onchange();"
+ 	onchange=" if(this.checked)
+ 	{
+ 		document.mainform.elements['[% filtercollection_paramname %]'].value = 'on';
+		enableFiltersInCollection('[% filtercollection_paramname %]'); 
+	} 
+	else 
+	{ 
+		document.mainform.elements['[% filtercollection_paramname %]'].value = 'off'; 
+		disableFiltersInCollection('[% filtercollection_paramname %]'); 
+	}" />
+
+[% END # End macro block %]

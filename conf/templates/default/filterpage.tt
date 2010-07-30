@@ -1,0 +1,40 @@
+[% PROCESS 'header.tt' %]
+<!-- $Id: filterpage.tt,v 1.1.1.1 2006-11-22 20:30:58 arek Exp $ -->
+
+<div id="mart_containerpanel">
+
+<form name="mainform" action="martview" method="post" enctype="multipart/form-data">
+
+<div id="mart_mainpanel">
+
+<div class="mart_main_menubar">
+
+<input type="hidden" name="interface_mode" value="[% session.param('interface_mode') %]" />
+[% PROCESS "wizard_menubar.tt" %]
+
+</div>
+
+<div style="text-align: right; padding: 4px;">
+<input type="hidden" name="prev_stage"    value="start" />
+<input type="hidden" name="current_stage" value="filter" />
+<input type="hidden" name="next_stage"    value="output" />
+<input type="image" name="submit.start" src="/martview/images/back-on.gif" value="Back" onclick="document.mainform.next_stage.value = 'start'; document.mainform.submit();" />
+<input type="image" name="submit.output" src="/martview/images/next-on.gif" value="Next" onclick="document.mainform.next_stage.value = 'output'; document.mainform.submit();" />
+</div>
+
+[% filterpanel = "filterpanel_" _ session.param('schema') _ '.' _ session.param('dataset') _ "\.tt" %]
+[% PROCESS $filterpanel %]
+
+</div> <!-- mainpanel closes -->
+
+<div id="mart_summarypanel">
+
+[% PROCESS "summarypanel.tt" %]
+
+</div> <!-- summary panel closes -->
+
+</form>
+
+</div> <!-- martpanel closes -->
+
+[% PROCESS 'footer.tt' %]

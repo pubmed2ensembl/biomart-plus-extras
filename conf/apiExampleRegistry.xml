@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MartRegistry>
+<MartRegistry>
+
+
+<MartURLLocation
+                    name         = "ensembl"
+                    displayName  = "ensembl"
+                    host         = "www.biomart.org"
+                    port         = "80"
+                    visible      = "1"
+                    default      = ""
+                     includeDatasets = "hsapiens_gene_ensembl"
+                    martUser     = ""
+/>
+
+
+
+<MartURLLocation
+                    name         = "sequence"
+                    displayName  = "sequence"
+                    host         = "www.biomart.org"
+                    port         = "80"
+                    visible      = "0"
+                    default      = ""
+                     includeDatasets = "hsapiens_genomic_sequence"
+                    martUser     = ""
+/>
+
+
+
+
+
+<MartURLLocation
+                    name         = "msd"
+                    displayName  = "msd"
+                    host         = "www.biomart.org"
+                    port         = "80"
+                    visible      = "1"
+                    default      = ""
+                     includeDatasets = ""
+                    martUser     = ""
+/>
+
+
+</MartRegistry>
+
+

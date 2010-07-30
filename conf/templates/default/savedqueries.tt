@@ -1,0 +1,48 @@
+[% # $Id: savedqueries.tt,v 1.1.1.1 2006-11-22 20:30:58 arek Exp $ %]
+
+[% #--------------------------------------------------------------------
+   # Template for rendering the saved-queries overview table.
+   #--------------------------------------------------------------------
+%]
+
+[% USE Number.Format %]
+[% PROCESS 'header.tt' %]
+
+<div id="mart_containerpanel">
+
+<form name="mainform" action="[% form_action %]" method="post" enctype="multipart/form-data">
+
+<div id="mart_main_menubar">
+  <img src="/martview/images/biomart-logo.gif" alt="" />
+</div>
+
+
+<div id="mart_mainpanel">
+<input type="submit" name="submit.deletequery" value="Delete" />
+
+<table class="mart_table">
+<tr class="mart_tr1">
+  <th class="mart_th">&nbsp;</th>
+  <th class="mart_th">Query name</th>
+  <th class="mart_th">Time saved</th>
+  <th class="mart_th">&nbsp;</th>
+</tr>
+[% i = 0 %]
+[% FOREACH query = session.param("savedqueries") %]
+<tr class="mart_tr1">
+  <td class="mart_td"><input type="checkbox" name="savedquery2delete" value="[% i %]" /></td>
+  <td class="mart_td">[% query.name %]</td>
+  <td class="mart_td">[% query.timestamp %]</td>
+  <td class="mart_td"><a href="javascript: void(0);" onclick="alert('Uh-oh, I am not implemented yet!');">Load</a> | <a href="[% form_action %]?savedquery2xml=[% i %]">Save as XML</a> | <a href="[% form_action %]?savedquery2delete=[% i %]">Delete</a></td>
+</tr>
+  [% i = i + 1 %]
+[% END %]
+</table>
+
+</div> <!-- mainpanel closes -->
+
+</form>
+
+</div> <!-- martpanel closes -->
+
+[% PROCESS 'footer.tt' %]

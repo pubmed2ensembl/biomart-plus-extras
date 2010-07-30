@@ -1,0 +1,93 @@
+[% # $Id: filter_text.tt,v 1.4 2007-01-09 17:16:00 rh4 Exp $ %]
+[% #--------------------------------------------------------------------
+   # Macro for rendering form element(s) for a simple text filter. The
+   # element(s) may be for a single filter, or a list of filters within
+   # a container which share the textfilter-property.
+   #--------------------------------------------------------------------
+%]
+[% MACRO render_textfield(filter, param_name, parent_filter) BLOCK %]
+
+[% dataset_name = filter.pointedFromDataset || filter.dataSetName %]
+[% IF parent_filter %]
+	[% filtercollection_param_name = "${dataset_name}__filtercollection.${parent_filter.filterCollection.name}" %]
+[% ELSE %]
+	[% filtercollection_param_name = "${dataset_name}__filtercollection.${filter.filterCollection.name}" %]
+[% END %]
+[% onblur_js = "
+if(filterEltHasValue(this)) {
+    checkFilterCollectionCheckbox('${filtercollection_param_name}');
+};
+" %]
+[% onblur_js = onblur_js.replace("\n", "") %]
+
+[% IF filter.multipleValues() || filter.filter.multipleValues()  %]
+  [% # Render textarea and file-upload button, so user can submit a list of values %] 
+<textarea name="[% param_name %]" cols="25" rows="4" onblur="[% onblur_js %]">
+[* session.param("[% param_name %]") || '' *]
+</textarea>
+<br />
+[% # Note use of onchange for files, as onblur works before filename is populated %]
+<input type="file" name="[% param_name %]__file" value="" size="16" onchange="[% onblur_js %]" />
+<input type="hidden" name="upload_file_params" value="[% param_name %]__file" />
+
+[% ELSE %]
+  [% # Render simple textfield for entry of a single query string %]
+<input type="text" name="[% param_name %]" value="
+[* IF session.param("[% param_name %]").defined() *]
+  [* session.param("[% param_name %]") *]
+[* ELSE *]
+  [% filter.defaultValue() || ''%]
+[* END *]
+" 
+
+
+
+[% autocomplete = filter.autoCompletion() %]
+	[% IF autocomplete %]
+		onblur="[% onblur_js %]" />
+	[% # NOTE TO SELF: add JS to initialize AutoSuggestControl object and attach to textfield %]
+	[% ELSE %]
+		onblur="[% onblur_js %]" />
+	[% END %]
+
+[% buttonURL = filter.buttonURL %]
+
+[% functionName  = param_name %]
+
+[% functionName = functionName.replace ('\.','__') %]
+
+[% IF buttonURL %]
+<input type='button' 
+               name="[% param_name %]__button"
+	       value="browse" onclick="func__[% functionName %]__button();"
+					/>
+
+	<script language="JavaScript" type="text/javascript" >
+	//<![CDATA[
+		function func__[% functionName %]__button()
+		{
+		 	var nW = window.open("[% buttonURL  %]", "[% filter.internalName %]",
+                                                               "menubar=no,scrollbars=yes,width=800,height=800");
+                                       if( nW.opener == null ){
+                                       nW.opener = window;
+                	}
+		}
+
+	//]]>
+	</script>
+	
+[% END %]
+
+[% IF filter.graph %]
+	
+	[% # ADD CODE TO GERNERATE ONTOLOGY FILES IN htdocs/tmp/_ontology - SEE OLD generate_ontology_picker code in old martview %]
+
+[% END %]
+
+
+[% END %]
+
+
+
+
+[% END # End textfield macro %]

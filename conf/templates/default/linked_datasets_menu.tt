@@ -1,0 +1,122 @@
+[% # $Id: linked_datasets_menu.tt,v 1.6 2007-10-10 14:08:02 syed Exp $ %]
+
+<!--never add height attribute in the following style. Safari loses sanity -->
+<div class="mart_datasetselectpanel" style="width:100%; overflow:auto;">
+<table width="100%" height="100%"  border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed;">
+<tr>
+<td width="100%" height="100%" valign="top" align="left">
+
+
+[% linked_dataset_list = wq.get_mart_registry.getDatasetsExportingTo_reverseDBs(session.param("schema"),session.param("dataset").first) %]
+[% IF linked_dataset_list.size() > 0 %]
+
+	<div class="mart_datasetlinkmenu">
+
+	<table cellpadding="0" width="100%" style="table-layout: fixed;">
+	<tr>
+	<!--
+	<td align="left" width="15%" valign="bottom">	
+		Linked [% session.param("__dataset") %]:
+	</td>
+	-->
+	<td align="left" width="85%" valign="bottom">	
+
+	<select name="linked_dataset" 
+	
+	class="mart_input"
+	onmouseover="this.className='mart_input mart_inputhov'" 
+	onmouseout="this.className='mart_input'"
+
+	onchange="var dsetName = document.mainform.elements['linked_dataset'].value; 
+
+	[% IF dataset.defined() %]
+ 		removeHiddenFormParam('dataset', '$dataset.name');
+ 		if(dsetName != 'NONE') 
+ 		{ 
+ 			addDatasetParamToForm(dsetName);
+ 		} 
+ 		else 
+ 		{
+ 			document.mainform['mart_mainpanel__current_visible_section'].value  = 'add_linked_datasetpanel'; 
+ 			document.mainform['summarypanel__current_highlighted_branch'].value = 'show_linked_datasetpanel'; 
+ 		}
+	[% ELSE %]
+ 		if(dsetName != 'NONE') 
+ 		{ 
+ 			addDatasetParamToForm(dsetName);
+ 		}
+		else {
+			return;
+		}
+	[% END %]
+	document.mainform.do_export.value = 0;
+	document.mainform.showquery.value = 0;  
+	document.mainform.savequery.value = 0; 
+			
+	if (document.getElementById('dsMenu_1').style.display == 'block')	{
+		// or dsMenu_2, just to flag its multi menu system for Web.pm
+		document.mainform.menuNumber.value = 5;
+	}
+	else {
+		document.mainform.menuNumber.value = 0;
+	}
+	document.mainform.target = '_self'; 
+	
+	var summaryCountElt1 = document.getElementById('summarypanel_filter_count_1');
+	if (summaryCountElt1)
+	{				
+		document.mainform.summarypanel_filter_count_1_hidden.value = summaryCountElt1.innerHTML;
+	}
+	document.mainform.summarypanel_filter_count_2_hidden.value = '';
+
+	document.mainform.resultsButton.value = 0;
+			
+	document.mainform.submit();">
+	
+	[% #calculate the length for splitter-line %]
+	[% splitter_line_length = 5 %]
+	[% FOREACH linked_dataset_name = linked_dataset_list %]
+  		[% linked_dataset = wq.get_mart_registry().getDatasetByName(session.param("schema"),linked_dataset_name) %]
+  		[% IF linked_dataset %]
+	  		[% IF  linked_dataset.locationDisplayName().length+linked_dataset.displayName().length+3 > splitter_line_length %]
+	  			[% splitter_line_length = linked_dataset.locationDisplayName().length+linked_dataset.displayName().length+3 %]
+	  		[% END %]
+		[% END %]
+	[% END %]
+
+	<option value="NONE" 
+	[% IF !dataset.defined() %]
+ 		selected="selected"
+	[% END %]
+	>- CHOOSE ADDITIONAL DATASET -</option>
+	
+	[% FOREACH linked_dataset_name = linked_dataset_list %]
+  		[% IF linked_dataset_name.match('splitter-line') %]
+			<option value="NONE">[% WHILE splitter_line_length > 0 %]-[% splitter_line_length = splitter_line_length - 1 %][% END %]</option>
+  		[% ELSE %]
+	  		[% linked_dataset = wq.get_mart_registry().getDatasetByName(session.param("schema"),linked_dataset_name) %]
+	  		[% IF linked_dataset %]
+		  		<option value="$linked_dataset_name"
+				[% IF dataset.defined() && dataset.name == linked_dataset_name %]
+					 selected="selected"
+				[% END %]>[[% linked_dataset.locationDisplayName() %]] [% linked_dataset.displayName() %]</option>
+			[% END %]
+		[% END %]
+	[% END %]
+	</select>
+	
+	</td>
+	</tr>
+	</table>
+	
+	</div>
+
+[% ELSE %]
+	 No linked [% session.param("__dataset") %]s available
+[% END %]
+
+</td>
+</tr>
+</table>
+
+</div>

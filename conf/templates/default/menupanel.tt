@@ -1,0 +1,203 @@
+[% #--------------------------------------------------------------------
+   # Template for rendering the menu panel
+   # Called by biomart.tt; enclosed in <table class ="mart_main_menubar"><tr><td>
+   # Currently renders buttons as input-submit form elements
+   #--------------------------------------------------------------------
+%]
+
+	<table class ="mart_main_menubar" width="100%" height="100%"  border="0" cellpadding="0" cellspacing="0">
+		<tr>
+		<td height="100%"  align="left" valign="top" >
+					     
+			<!--
+			<img src="/martview/images/biomart-logo.gif" alt="" style="float: right; margin: 6px 4px 0px 0px"/></a> 				 
+			-->
+	
+		
+			<!--input type="submit" value="New" style="margin: 0px 0px 0px 6px" name="submit.newsession"--> 
+			<a id="new_button_tag"
+				style="margin-left:6px; 
+        		"
+				class="mart_btn_new"
+	   			onmouseover="this.className='mart_btn_new mart_btnhov'" 
+	   			onmouseout="this.className='mart_btn_new'"
+				onclick="
+				var currentPath = window.location.pathname; 
+				currentPath = currentPath.replace('/[% session.param('_SESSION_ID') %]', '');			
+				[% IF session.param("GALAXY_URL") %]
+				currentPath = currentPath + '?GALAXY_URL=[%session.param("GALAXY_URL")%]';
+				[% END %] 
+				window.location = currentPath; 
+	
+	  			return false; 
+
+	  			" 
+	  			title="Start a new query">New
+	  		</a>
+	
+	
+			<!--input type="button" value="Count" name="get_count_button" -->
+			<a id="count_button_tag"
+				style="margin-left:4px;
+				"
+				class="mart_btn_count"
+				onmouseover="this.className='mart_btn_count mart_btnhov'" 
+				onmouseout="this.className='mart_btn_count'"
+
+				onclick="
+				if (datasetExists() > 0) {
+					document.getElementById('summarypanel_filter_count_1').innerHTML = 'Loading... ';
+					addLoadingImage('summarypanel_filter_count_1', '[% TAG_path %]');
+					
+					if (document.getElementById('summarypanel_filter_count_2') != null)	{
+						document.getElementById('summarypanel_filter_count_2').innerHTML = 'Loading... ';
+						addLoadingImage('summarypanel_filter_count_2', '[% TAG_path %]');
+					}
+					document.mainform.formatterMenu.value = 'preView';
+					document.mainform.do_export.value = 0; 
+					document.mainform.track_visible_section.value = document.mainform['mart_mainpanel__current_visible_section'].value;
+					document.mainform.savequery.value = 0; 
+					document.mainform.showquery.value = 0; 
+					document.mainform.countButton.value = 5;
+			
+					document.mainform.target = 'count_hiddenIFrame';
+					document.mainform.submit();
+	
+					document.mainform.countButton.value = 1;
+				
+					return false;
+				}
+
+				" title="Get result count for the query with any filters applied">Count
+			</a>
+
+	
+			<!--input type="button" value="Results" name="get_results_button" -->
+			<a id="results_button_tag"
+				style="margin-left:4px;
+				"
+				class="mart_btn_results"
+				onmouseover="this.className='mart_btn_results mart_btnhov';" 
+				onmouseout="this.className='mart_btn_results';"
+			
+				onclick="
+				if (datasetExists() > 0) {
+					document.getElementById('resultsTableId').innerHTML = 'Loading... ';
+					addLoadingImage('resultsTableId', '[% TAG_path %]');
+					document.mainform.formatterMenu.value = 'preView';
+					document.mainform.do_export.value = 0; 
+					document.mainform.savequery.value = 0;
+					document.mainform.showquery.value = 0;  
+		
+					var summaryCountElt1 = document.getElementById('summarypanel_filter_count_1');
+					if (summaryCountElt1)	{				
+						document.mainform.summarypanel_filter_count_1_hidden.value = summaryCountElt1.innerHTML;
+					}
+					var summaryCountElt2 = document.getElementById('summarypanel_filter_count_2');
+					if (summaryCountElt2)	{
+						document.mainform.summarypanel_filter_count_2_hidden.value = summaryCountElt2.innerHTML;
+					}
+			
+					showPanelHideSiblings('resultspanel');			
+					setHighlightedSummaryPanelBranch('show_results');			
+	
+					document.mainform.track_visible_section.value = document.mainform['mart_mainpanel__current_visible_section'].value;
+	
+					document.mainform['mart_mainpanel__current_visible_section'].value = 'resultspanel'; 
+					document.mainform['summarypanel__current_highlighted_branch'].value = 'show_results'; 
+
+					document.mainform.resultsButton.value = 5;
+		
+					document.mainform.target = 'results_hiddenIFrame';
+					document.mainform.submit();
+			
+					document.mainform.resultsButton.value = 1;			
+				
+					return false;
+				}
+				" title="Preview the results of the query">Results
+			</a>
+	
+		</td>
+		<td height="100%" align="right" valign="top" >
+
+			<a id="url_button_tag"
+				style="margin-right:4px;
+				"
+				class="mart_btn_url"
+   			onmouseover="this.className='mart_btn_url mart_btnhov'" 
+   			onmouseout="this.className='mart_btn_url'"
+          	onclick="
+				if (datasetExists() > 0) {          	
+	          	document.mainform.showquery.value = 3; 
+   	       	document.mainform.do_export.value = 0; 
+					document.mainform.savequery.value = 0; 
+					document.mainform.target = 'newwindow'; 
+					document.mainform.submit();
+				}
+				" title ="Show query in URL Access Format - Bookmark">URL
+			</a>
+		
+			<a id="xml_button_tag"
+				style="margin-right:4px;
+				"
+				class="mart_btn_xml"
+   			onmouseover="this.className='mart_btn_xml mart_btnhov'" 
+   			onmouseout="this.className='mart_btn_xml'"
+          	onclick="
+				if (datasetExists() > 0) {          	
+	          	document.mainform.showquery.value = 1; 
+   	       	document.mainform.do_export.value = 0; 
+					document.mainform.savequery.value = 0; 
+					document.mainform.target = 'newwindow'; 
+					document.mainform.submit();
+				}
+				" title ="Show query in XML Web Service Format">XML
+			</a>
+
+			<a id="perl_button_tag"
+				style="margin-right:4px;
+				"
+				class="mart_btn_perl"
+   			onmouseover="this.className='mart_btn_perl mart_btnhov'" 
+   			onmouseout="this.className='mart_btn_perl'"
+          	onclick="
+				if (datasetExists() > 0) {          	
+	          	document.mainform.showquery.value = 2; 
+   	       	document.mainform.do_export.value = 0; 
+					document.mainform.savequery.value = 0; 
+					document.mainform.target = 'newwindow'; 
+					document.mainform.submit();
+				}
+				" title ="Show query as Perl Script">Perl
+			</a>
+	        
+			<a id="help_button_tag"
+				style="margin-right: 6px;
+				"
+				class="mart_btn_help"
+   			onmouseover="this.className='mart_btn_help mart_btnhov'" 
+   			onmouseout="this.className='mart_btn_help'"
+   			
+          	onclick="
+         	 	document.mainform.showquery.value = 0; 
+        		  	document.mainform.do_export.value = 0; 
+					document.mainform.savequery.value = 0;
+					document.mainform.target = '_self'; 
+					var summaryCountElt1 = document.getElementById('summarypanel_filter_count_1');
+					if (summaryCountElt1)	{				
+						document.mainform.summarypanel_filter_count_1_hidden.value = summaryCountElt1.innerHTML;
+					}
+					var summaryCountElt2 = document.getElementById('summarypanel_filter_count_2');
+					if (summaryCountElt2)	{
+						document.mainform.summarypanel_filter_count_2_hidden.value = summaryCountElt2.innerHTML;
+					}
+	         	javascript:void(window.open('/[% TAG_path %]/mview/help.html','martview','width=600,height=500,resizable,scrollbars'));	
+				" title ="Get Help">Help
+			</a>
+
+
+		</td>
+		</tr>
+	</table>
+

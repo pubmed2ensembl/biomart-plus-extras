@@ -1,0 +1,24 @@
+[% # $Id: filteroption_pushactions.tt,v 1.1.1.1 2006-11-22 20:30:58 arek Exp $ %]
+
+[% #-----------------------------------------------------------------
+   # Macro to process pushactions potentially defined for the filter
+   # passed to it, and create the Javascript needed to handle those 
+   # pushactions in the page. Pushactions can be recursive, so this
+   # macro needs to call itself to traverse the tree.
+   # Note especially the use of a global hashref passed from the template-
+   # builder which is used to collect all pushaction-info in one place.
+   #-----------------------------------------------------------------
+%]
+[% MACRO process_pushactions(filteroption, option_name, menuname, dataset_name) BLOCK %]
+  [% FOREACH pushaction = filteroption.getAllPushActions() %]
+    [% menu2_name   = "${dataset_name}__filter.${pushaction.ref}" %]
+    [% js_pushactions_of_filtermenu.$menuname.$option_name.$menu2_name = [] %]
+    [% FOREACH pa_option = pushaction.getAllOptions() %]
+      [% # Add entry to global pushaction-info hash %]
+      [% js_pushactions_of_filtermenu.$menuname.$option_name.$menu2_name.push([pa_option.name, pa_option.displayName]) %]
+      [% js_sessionvalue_of_filtermenu.$menu2_name = "[* session.param(\"\${param_prefix}$menu2_name\")  || \"\" *]" %]
+      [% process_pushactions(pa_option, menu2_name, dataset_name) %]
+    [% END # foreach pushaction_option %]
+  [% END # foreach pushaction %]
+
+[% END # End render_pushactions() macro %]

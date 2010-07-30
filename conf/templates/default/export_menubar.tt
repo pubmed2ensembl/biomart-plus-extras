@@ -1,0 +1,47 @@
+
+<div class="mart_export_menubar">
+Save
+<select name="${dset_name}__export_subset">
+  <option value="">All</option>
+  <option value="5"
+[% IF session.param('export_subset').defined() && session.param('export_subset') == 5 %]
+ selected="selected"
+[% END %]>5</option>
+  <option value="10"
+[% IF session.param('export_subset').defined() && session.param('export_subset') == 10 %]
+ selected="selected"
+[% END %]>10</option>
+  <option value="20"
+[% IF !session.param('export_subset').defined()
+   || (session.param('export_subset').defined() && session.param('export_subset') == 20) %]
+ selected="selected"
+[% END %]>20</option>
+  <option value="50"
+[% IF session.param('export_subset').defined() && session.param('export_subset') == 50 %]
+ selected="selected"
+[% END %]>50</option>
+  <option value="100"
+[% IF session.param('export_subset').defined() && session.param('export_subset') == 100 %]
+ selected="selected"
+[% END %]>100</option>
+</select>
+
+entries in 
+<select name="foot">
+  <option value="">--Select format--</option>
+  <option value="html">HTML</option>
+  <option value="tsv">Text, tab seperated</option>
+</select>
+
+
+as
+
+<select name="${dset_name}__export_saveto" onchange="if(this.value != '') {document.mainform.do_export.value = '1'; document.mainform.export_dataset.value = '$dset_name'; document.mainform.submit();}">
+  <option value="" selected="selected">Select format</option>
+  <option value="text">  Text</option>
+  <option value="gz">  gzip(.gz)</option>
+</select>
+
+<!-- <input type="submit" name="foo" value="Go" /> -->
+
+</div> <!-- Export menu panel ends -->

@@ -1,0 +1,5 @@
+[% # $Id: notfound.tt,v 1.1.1.1 2006-11-22 20:30:58 arek Exp $ %]
+
+<h4>
+ERROR: requested template missing
+</h4>

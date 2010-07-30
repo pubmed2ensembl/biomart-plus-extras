@@ -1,0 +1,315 @@
+[% # $Id: attributepanel.tt,v 1.8 2007-07-02 13:32:49 syed Exp $ %]
+[% # Template to render all attribute-tree sections for a dataset, containing attribute
+   # checkbox lists and related user-interface components %]
+
+[% USE Number.Format %]
+
+[% # Start with the list of radio buttons, one for each att-page %]
+<div id="[% dataset.name %]__attributepanel" style="display: none; width:100%; height:100%; overflow:auto;">
+<table width="100%" height="100%"  border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed;">
+<tr>
+<td width="100%" height="100%" valign="top" align="left">
+
+<div class="dummyLine_1" align="center"><b>Please select columns to be included in the output and hit 'Results' when ready</b></div>
+
+[% default_attributetree = '' %]
+
+[% attributetree_count = 0 %]
+[% FOREACH attributetree = attributetrees %]
+   [% NEXT IF attributetree.hideDisplay().defined && attributetree.hideDisplay == 'true' %]
+   [% attributetree_count = attributetree_count + 1 %]
+[% END %]
+
+[% attributetree_count_half =  attributetree_count / 2 %]
+[% attributetree_count_half =  attributetree_count_half | round(0) %]
+
+[% IF attributetree_count > 1 %]
+<div class="mart_attributepage_selection floatholder">
+
+<input type="hidden" name="" value="" />
+[% atttree_count = 0 %]
+<div class="mart_attributepage_selection_col">
+
+[% FOREACH attributetree = attributetrees %]
+  [% NEXT IF attributetree.hideDisplay().defined && attributetree.hideDisplay == 'true' %]
+  [% atttree_count = atttree_count + 1 %]
+  [% # insert divider to create 2-column list of radio buttons %]
+  [% IF atttree_count > attributetree_count_half %]
+     [% atttree_count = 0 %]
+</div>
+<div class="mart_attributepage_selection_col">
+    
+  [% END %]
+  [% default_attributepage_for_export = default_attributepage_for_export || attributetree.name() %]
+  [% default_attributetree = default_attributetree || attributetree.name() %]
+  	<input type="radio" name="[% dataset.name %]__attributepage" value="[% attributetree.name() %]" 
+  	onclick="
+  	if(this.checked) 
+  	{ 
+  		showPanelHideSiblings('[% dataset.name %]__attributepanel__[% attributetree.name %]'); 
+  		expandListCompactSiblings('[% dataset.name %]__[% attributetree.name %]__attributelist'); 
+  	} 
+  	resetResultsPanel();"
+  	[* IF session.param("[% dataset.name %]__attributepage").defined 
+  		&& session.param("[% dataset.name %]__attributepage") == "[% attributetree.name() %]" *]
+ 		checked="checked" 
+	[* ELSIF "[% attributetree.name() %]" == "$default_attributetree" *]
+		checked="checked" 
+	[* END *]
+	/>
+	
+	[% IF attributetree_count > 1 %]
+		[% IF attributetree.description %]
+		<a title="[% attributetree.description | replace('"','&quot;') %]">[% attributetree.displayName() %]</a>
+	  	[% ELSE %]
+		[% attributetree.displayName() %]
+	  	[% END %]
+  		<br />
+  	[% END %]
+
+[% END # end foreach att-tree %]
+</div>
+<!-- this is just a dummy div to prevent the contents of attriubte tree collection from falling out of div - only happens in IE 6 -->
+<div class="collectionBREAK"></div>
+
+</div>
+[% ELSE # this serves the cases where we have only one radio button for attribute panels e.g MSD %]
+	[% FOREACH attributetree = attributetrees %]
+	[% NEXT IF attributetree.hideDisplay().defined && attributetree.hideDisplay == 'true' %]
+  		[% default_attributepage_for_export = default_attributepage_for_export || attributetree.name() %]
+	  	[% default_attributetree = default_attributetree || attributetree.name() %]
+	  	<input type="radio" style="display:none;" name="[% dataset.name %]__attributepage" value="[% attributetree.name() %]" 
+	  	onclick="
+  		if(this.checked) 
+	  	{ 
+  			showPanelHideSiblings('[% dataset.name %]__attributepanel__[% attributetree.name %]'); 
+  			expandListCompactSiblings('[% dataset.name %]__[% attributetree.name %]__attributelist'); 
+	  	} 
+	  	resetResultsPanel();"
+  		[* IF session.param("[% dataset.name %]__attributepage").defined 
+  		&& session.param("[% dataset.name %]__attributepage") == "[% attributetree.name() %]" *]
+ 		checked="checked" 
+		[* ELSIF "[% attributetree.name() %]" == "$default_attributetree" *]
+		checked="checked" 
+		[* END *]
+		/>
+	[% END %]
+[% END %]
+
+[% # Then iterate through all att-pages again to render the main HTML-form stuff %]
+<div id="[% dataset.name %]__attributepages">
+
+  <input type="hidden" name="[% dataset.name %]__attributepages__current_visible_section" value="[* session.param('[% dataset.name %]__attributepages__current_visible_section') || '[% dataset.name %]__attributepanel__[% default_attributetree %]' *]" />
+
+[% FOREACH attributetree = attributetrees %]
+  [% NEXT IF attributetree.hideDisplay().defined && attributetree.hideDisplay == 'true' %]
+
+  [% default_attributes = [] # Holds list of attributes that the config says are default on. These
+                             # get checked via JScript on initial load of the page (see bottom of this template). %]
+
+<div id="[% dataset.name %]__attributepanel__[% attributetree.name() %]" style="display: none">
+
+[* all_attributepages.push("[% dataset.name %]__[% attributetree.name() %]") *]
+
+<div class="mart_attributepanel">
+
+[% attgroupcount = 0 %]
+[% FOREACH attributegroup = attributetree.getAllAttributeGroups %]
+	[% attgroupcount = attgroupcount + 1 %]
+[% END %]
+[% IF attgroupcount > 1 %]
+	[% attgroup_initial_state = "hide"  # by default none of the groups should be expanded if more than one group %]
+[% ELSE %]
+	[% attgroup_initial_state = "show"  # by default the first att-group section should be expanded only if there is only one group %]
+[% END %]
+
+[% FOREACH attributegroup = attributetree.getAllAttributeGroups %]
+
+<div class="mart_attributegroup floatholder">
+
+[% # Javascript + parameters to show/hide collapsible attributegroup sections. State is stored in session, but
+   # we want to have some sections expanded by default, so the user seems something on first visit %]
+[% attributegroup_parname = '${param_prefix}' _ attributetree.name _ '__attributegroup.' _ attributegroup.name %]
+[* render_collapse_controls("$attributegroup_parname", "$attributegroup.displayName", "$attgroup_initial_state", "$attributegroup.description" ) *]
+[% attgroup_initial_state = "hide" IF attgroup_initial_state == "show" %]
+
+	[% FOREACH attributecollection = attributegroup.getAllCollections %]
+	[% attributecollection_parname = "[* param_prefix*]${attributetree.name}__attributecollection.${attributecollection.name}" %] 
+
+	<div class="mart_attributecollection" id="$attributecollection_parname">
+
+	[% attributes = attributecollection.getAllAttributes() %]
+		[% IF attributes.size > 0 %]
+		<span class="mart_attributecollection_title">[% IF attributecollection.description %]
+		<a title="[% attributecollection.description | replace('"','&quot;') %]">$attributecollection.displayName</a>
+		[% ELSE %]
+		$attributecollection.displayName
+	  	[% END %]</span>
+
+	[% IF attributecollection.maxSelect().defined && attributecollection.maxSelect() != 0 %]
+
+ 		(max [% attributecollection.maxSelect() %])
+
+	 	[% IF attributecollection.maxSelect() == 1 %]
+   			[% # Image tag for radio group, which may or may not get populated. %]  
+		   <br/>
+		   <img name="[% attributecollection_parname %]__image" src="/martview/images/blank.gif" alt=""/>
+	 	[% END %]
+
+	[% ELSE %]
+
+		[% IF attributecollection.selectAll().defined && attributecollection.selectAll() == 'true' %]
+		<input type="checkbox" name="[% attributecollection_parname %]_a" id="[% attributecollection_parname %]_a" onclick="checkCheckboxesInContainer(this,1)" />Select all
+		<input type="checkbox" name="[% attributecollection_parname %]_n" id="[% attributecollection_parname %]_n" onclick="checkCheckboxesInContainer(this,0)" />Deselect all
+		[% END %]
+	
+	[% END %]
+	<br />
+
+
+[% # since we can't use CSS3 multi-column layout yet (that be too easy!), we need to
+   # split the list of attributes within a collection in two and show side by side. UGLY!! %]
+
+[% attcount = attributes.size() %]
+
+[% PERL # dive into Perl for some rounding! %]
+my $attcount = $stash->get('attcount');
+my $attcount_half = int($attcount / 2);
+if($attcount_half == 0 || $attcount / $attcount_half != 2) {
+   $attcount_half++;
+}
+$stash->set('attcount_half', $attcount_half-1);
+[% END %]
+
+
+<table cellpadding="0" border= "0" width="100%" style="table-layout: fixed;">
+<tr>	
+<td align="left" width="50%" valign="top">
+
+[% FOREACH attribute = attributes.slice(0,attcount_half) %]
+  [% IF attribute.displayType.defined() %]
+	  [% PROCESS 'attributefilter.tt' attribute=attribute %]
+  [% ELSE %]
+	  [% PROCESS 'attribute.tt' attribute=attribute %]
+  [% END %]
+[% END %]
+
+</td>
+
+<td align="left" width="45%" valign="top">
+
+[% attcount_half = attcount_half + 1 %]
+
+
+[% FOREACH attribute = attributes.slice(attcount_half) %]
+  [% IF attribute.displayType.defined() %]
+	  [% PROCESS 'attributefilter.tt' attribute=attribute %]
+  [% ELSE %]
+	  [% PROCESS 'attribute.tt' attribute=attribute %]
+  [% END %]
+[% END %]
+
+</td>
+</tr>
+</table>
+
+
+
+
+
+[% ELSE %]
+  <span style="font-size: 80%"><i>No visible attributes in collection $attributecollection.name</i></span>
+[% END %]
+
+</div>
+
+<!-- this is just a dummy div to prevent the contents of last attribute collection from falling out of div - only happens in IE 6 -->
+<div class="collectionBREAK"></div>
+    [% END %]
+
+</div>
+</div>
+  [% END %]
+
+</div>
+
+<script language="JavaScript" type="text/javascript" >
+//<![CDATA[
+
+// Update summary-tree on side panel according to enabled-attributes info stored in 
+// the session OR the list of default attributes to pre-enable (if any).
+
+[* atts_to_check = session.param("\${vs_param_prefix}[% attributetree.name() %]__attributelist") *]
+//1: atts_to_check.join()=     '[* atts_to_check.join('|') *]'
+//1: atts_to_check=     '[* atts_to_check || "[undef]" *]'
+//1: atts_to_check.size='[* atts_to_check.size() || "[undef]" *]'
+
+[* IF !atts_to_check || atts_to_check == ' ' *]
+  [* atts_to_check = [[% default_attributes.join(',') %]]  *]
+[* END *]
+       
+// default_attributes.join()='[* default_attributes.join('|') *]'
+//1: atts_to_check.join()=     '[* atts_to_check.join('|') *]'
+[* tmp_array = [] *]
+[* FOREACH att = atts_to_check *]
+  [* NEXT IF att == " " *]
+  [* tmp_array.push("'\$att' : ''") *]
+[* END *]
+
+for(var attributeEltName in {
+
+[* tmp_array.join(",\n") *]
+
+}) {
+    var attributeCheckboxElt = document.mainform.elements[attributeEltName];
+    //alert('Updating summary panel with enabled attribute '+attributeEltName);
+    if(attributeCheckboxElt && attributeCheckboxElt.type == 'checkbox') {
+      attributeCheckboxElt.checked = 'checked';
+      attributeCheckboxElt.onchange();
+    }
+    else {
+        //alert('Checkbox for attribute '+attributeEltName+' not found, trying attcollection radio buttons instead');
+        var attributeRadiobuttonElt = document.mainform.elements[attributeEltName];
+        if(attributeRadiobuttonElt) {
+            //alert('Updating summary panel with enabled (radiobutton) attribute '+attributeEltName);
+            attributeRadiobuttonElt.click();
+        }
+    }
+}
+
+
+//]]>
+</script>
+
+</div>
+
+[% END # foreach attribute tree ends %] 
+</div>
+
+<script language="JavaScript" type="text/javascript" >
+//<![CDATA[
+
+// On initial page-load, set one att-page as the current visible one
+showPanelHideSiblings(document.mainform['[% dataset.name %]__attributepages__current_visible_section'].value);
+
+// Also expand attribute-list for the active attpage for this dataset
+var attpage2expand;
+var attPageRadios = document.getElementsByName('${dataset.name}__attributepage');
+for(var i=0;i < attPageRadios.length;i++) { 
+    if(attPageRadios[i].checked) {
+        attpage2expand = '${dataset.name}__'+attPageRadios[i].value;
+        break;
+    } 
+}
+expandListCompactSiblings(attpage2expand+'__attributelist');
+
+//]]>
+</script>
+
+</td>
+</tr>
+</table>
+
+</div>
+
+[* default_attributepage_for_export = "\${param_prefix}$default_attributepage_for_export" *]

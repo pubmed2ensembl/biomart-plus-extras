@@ -1,0 +1,13 @@
+Cached
+sessions
+httpd.conf
+*.cached
+*.min_cached_mem
+rhMartRegistry.xml
+*backup
+mytest.xml
+localRegistry.xml
+ens41.xml
+registry_DOM_XML
+cachedRegistries
+rh.xml

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MartRegistry>
+<MartRegistry>
+
+<RegistryURLPointer
+                    name         = "central_server"
+                    host         = "www.biomart.org"
+                    port         = "80"
+                    path         = ""
+                    includeMarts = "msd,uniprot"
+/>
+</MartRegistry>

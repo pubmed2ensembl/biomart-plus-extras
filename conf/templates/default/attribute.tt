@@ -1,0 +1,112 @@
+[% # $Id: attribute.tt,v 1.7 2007-06-15 10:11:37 syed Exp $
+   # For most attributes we just need to show the display name and that's
+   # it. But some are actually attributes in another dataset, so we need to
+   # fetch the display name from that dataset config.
+   #
+   # NOTE: the current name-based way of specifying a 'placeholder' attribute
+   # will probably be superseded by something more advanced in the near future,
+   # so an overhaul will be needed here!%]
+
+[% attribute_displayname = attribute.displayName() %]
+[% attribute_parname = "\${param_prefix}"_ attributetree.name _ "__attribute.$attribute.name" %]
+[% attributecollection_parname = "[* param_prefix*]${attributetree.name}__attributecollection.${attributecollection.name}" %] 
+<div class="attribute" id="[% attribute_parname %]__container">
+[% # Render checkbox and attribute name, but only if we could actually retrieve the info %]
+[% IF attribute_displayname != 0 %]
+
+
+[% IF attributecollection.maxSelect() && attributecollection.maxSelect() == 1 %]
+  <input type="radio" name="${attribute_parname}" value="$attribute_parname" 
+  onclick="
+  document.mainform.elements['$attribute_parname'].value = 'on'; 
+  addToSummaryPanelList('\${param_prefix}[% attributetree.name() %]__attributelist', '$attribute_parname','[%  attribute_displayname.replace("'", "&lsquo;") %]'); 
+  this.checked = 'checked';
+  [% IF attribute.imageURL.defined() %]
+
+  	document['[% attributecollection_parname %]__image'].src='/[% TAG_path %][% attribute.imageURL().replace('/martview/','/mview/') %]'; 
+  [% END %]  
+	var siblingNodes = getElements_mart(this.parentNode.parentNode.parentNode); 
+	for(var i=0; i<siblingNodes.length; i++) 
+	{ 
+		var sN=siblingNodes[i];
+	  	if (sN==this) continue;
+	  	if(sN.tagName == 'INPUT' && sN.type == 'hidden' && sN.value == 'on') 
+	  	{ 
+	  		sN.value = 'off'; 
+	  		removeFromSummaryPanelList('\${param_prefix}[% attributetree.name() %]__attributelist', sN.name); 
+	  	} 
+	  	else if(sN.type == 'radio')
+	  	{ 
+			removeFromSummaryPanelList('\${param_prefix}[% attributetree.name() %]__attributelist', sN.name); 
+			sN.checked = false;
+			sN.onchange();
+		}
+	}
+  onchange();" 
+  
+  onchange="
+	    [% FOREACH dep = attribute.dependencies %]
+	    updateDependentAttributes('\${param_prefix}[% attributetree.name() %]__attribute.${dep}');
+	 	[% END %]  
+   "/>
+[% ELSE %]
+  <input type="checkbox" name="${attribute_parname}" 
+  onclick="check('${attributecollection_parname}_a', 0); 
+  check('${attributecollection_parname}_n', 0);
+  onchange();"
+   
+  onchange="if(this.checked)
+  {	
+  	document.mainform.elements['$attribute_parname'].value = 'on';
+  	addToSummaryPanelList('\${param_prefix}[% attributetree.name() %]__attributelist', '$attribute_parname','[%  attribute_displayname.replace("'", "&lsquo;") %]'); 
+  }
+  else
+  {
+  	document.mainform.elements['$attribute_parname'].value = 'off'; 
+  	removeFromSummaryPanelList('\${param_prefix}[% attributetree.name() %]__attributelist', '$attribute_parname');
+  }
+	    [% FOREACH dep = attribute.dependencies %]
+	    updateDependentAttributes('\${param_prefix}[% attributetree.name() %]__attribute.${dep}');
+	 	[% END %]  
+  "/>
+  [% IF attribute.imageURL.defined() %]
+     [% # Image tag for checked attributes only. %]
+     <!-- [% attribute.imageURL() %] -->
+     <img src="/[% TAG_path %][% attribute.imageURL().replace('/martview/','/mview/') %]" alt=""/>
+  [% END %]  
+[% END %]
+
+[% IF attribute.description %]
+<a title="[% attribute.description | replace('"','&quot;') %]">[% attribute_displayname %]</a>
+[% ELSE %]
+  [% attribute_displayname %]
+[% END %]
+
+
+[% IF attribute.default.defined() && attribute.default == "true"  %]
+  [% default_attributes.push("\"$attribute_parname\"") # Add to list of default atts to pre-check %]
+[% END %]
+
+[% IF attribute.dependsOn %]      
+		<script language="JavaScript" type="text/javascript" >
+		//<![CDATA[
+		// Set up the dependency map.
+		dependencyType['$attribute_parname'] = '$attribute.dependsOnType';
+		dependencyMap['$attribute_parname'] = new Array();
+		var deps = '$attribute.dependsOn'.split(',');
+		for (var i = 0 ; i < deps.length; i++) {
+	 	dependencyMap['$attribute_parname'].push("\${param_prefix}${attributetree.name}__attribute."+deps[i]);
+	 	}
+	 	// By default, disable this one until another is checked.
+	   	document.mainform.elements['$attribute_parname'].disabled = 'true'; 
+		//]]>
+		</script>
+[% END %]
+
+[% ELSE %]
+<i>$attribute.name</i> not available
+[% build_errors.${attribute.name} = tbuilder.get_errstr() %]
+
+[% END %]
+
+</div>

@@ -1,0 +1,104 @@
+
+<div id="mart_datasetselectpanel" class="mart_datasetselectpanel" style="" >
+
+
+<div id="schemaMenu" class="mart_schemamenu" style="">
+	<select name="schemamenu" 
+		class="mart_input"
+		onchange="
+
+			removeHiddenFormParam('schema');
+
+			addHiddenFormParam('schema', document.mainform, this.options[this.selectedIndex].innerHTML);
+			clearSummaryPanel();
+			removeHiddenFormParam('dataBase');		
+			removeHiddenFormParam('dataset');
+			schemaMenuTriggered(this.options[this.selectedIndex].value);
+		">
+	</select>
+</div>
+
+<div id="dbMenu" class="mart_databasemenu" style="display:none;">
+	<select  name="databasemenu" 
+		class="mart_input"
+		onchange="
+
+			removeHiddenFormParam('schema');
+			addHiddenFormParam_Schema('schema', document.mainform, this.options[this.selectedIndex].value);
+									
+			removeHiddenFormParam('dataBase');
+
+			addHiddenFormParam('dataBase', document.mainform, this.options[this.selectedIndex].innerHTML);
+			clearSummaryPanel();
+			
+			removeHiddenFormParam('dataset');
+
+			dbMenuTriggered(this.options[this.selectedIndex].value);
+		">
+	</select>
+</div>
+
+<div id="dsMenu_1" class="mart_datasetmenu_compara" style="display:none;">
+	<select name="datasetmenu_1"
+		class="mart_input"	
+		onchange="
+			document.mainform.menuNumber.value = 1;
+			clearSummaryPanel();
+			removeHiddenFormParam('dataset');
+			datasetmenu_1_Triggered(this.options[this.selectedIndex].value);
+		">
+
+	</select>
+</div>
+
+<div id="dsMenu_2" class="mart_datasetmenu_compara" style="display:none;">
+	<select name="datasetmenu_2"
+		class="mart_input"	
+		onchange="
+			document.mainform.menuNumber.value = 2;
+			clearSummaryPanel();
+			removeHiddenFormParam('dataset');			
+			datasetmenu_2_Triggered(this.options[this.selectedIndex].value);
+		">
+
+	</select>
+</div>
+
+<div id="dsMenu_3" class="mart_datasetmenu" style="display:none;">
+	<select name="datasetmenu_3"
+		class="mart_input"	
+		onchange="
+			document.mainform.do_export.value = 0;
+			document.mainform.showquery.value = 0;
+			removeHiddenFormParam('dataset');
+			if(this.options[this.selectedIndex].value != '')	{
+				if (document.getElementById('dsMenu_1').style.display == 'block')	{
+					// or dsMenu_2, just to flag its multi menu system for Web.pm
+					document.mainform.menuNumber.value = 3;
+				}
+				else {
+					document.mainform.menuNumber.value = 0;
+				}
+
+				addDatasetParamToForm(this.options[this.selectedIndex].value);
+				if (document.getElementById('summarypanel_filter_count_1') != null)	{
+					document.getElementById('summarypanel_filter_count_1').innerHTML = '';
+					document.mainform.summarypanel_filter_count_1_hidden.value = '';
+				}
+				if (document.getElementById('summarypanel_filter_count_2') != null)	{
+					document.getElementById('summarypanel_filter_count_2').innerHTML = '';
+					document.mainform.summarypanel_filter_count_2_hidden.value = '';
+				}
+				document.mainform.target = '_self';
+				document.mainform.resultsButton.value = 0;				
+				document.mainform.submit();
+			}
+			else{
+				clearSummaryPanel();
+				//alert('not submitting - SOME WEIRD ERROR');
+			}
+		">
+	</select>
+</div>
+
+</div>

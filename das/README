@@ -1,0 +1,208 @@
+                              BioMart DAS Adaptor
+
+A.  Introduction
+
+    The BioMart DAS ProServer Adaptor can be used to turn any existing
+    BioMart Dataset into one or more DAS Sources that can be utilized
+    by any DAS compatible client.  To do this, simply install the
+    biomart.pm module into the ProServer SourceAdaptor directory,
+    add a BioMart DAS compatible Importable-Exportable pair to the
+    DatasetConfig.xml document which describes the dataset, and create
+    a ProServer ini-file to configure the server.  Once the ProServer
+    process is started using the ini-file, the source is available,
+    without any programming.
+
+B.  Installation
+
+    1.  Install ProServer:  If you haven't already done so, download the
+        Perl software as described in the ProServer installation guide.
+        The guide is available from
+
+        http://www.ensembl.org/info/data/external_data/das/proserver-guide.pdf
+
+    2.  Install the BioMart ProServer Adaptor: Copy (or link) biomart.pm
+        to the Bio/Das/ProServer/SourceAdaptor directory within the
+        ProServer directory tree.
+
+    3.  Install MartJ: If you haven't already done so, download the
+        latest stable version of the MartJ binaries from ##TODO##URL##,
+        and follow the installation instructions provided.  You will
+        need to use the MartEditor Configuration tool which is included
+        in this package to edit your DatasetConfig.xml files.
+
+C.  Deploying a BioMart DAS Source
+
+    1.  Create BioMart DAS compatible Importable-Exportable pairs: Each
+        BioMart Dataset can serve multiple BioMart DAS Sources, using
+        one Importable-Exportable pair (e.g., both having the same
+        linkName) for each source.  Use the MartEditor Java Mart
+        Configuration tool to edit the DatasetConfig.xml document for
+        your mart and dataset.  To be BioMart DAS compatible, your
+        Importable must contain an ordered list of 1 to 3 filters in its
+        filters attribute.  The order of these filters must correspond
+        to the following functional ordering:
+
+            segment, start, end (segment required)
+
+        The actual internalNames for these filters can be determined by
+        the deployer.  A BioMart DAS compatible Exportable can contain
+        between 3 and 10 attributes in its attributes list.  The order
+        of the attributes in this list must correspond functionally
+        with the order of the DAS feature hash keys specified in the
+        feature_keys attribute of the ini-file (see below).  Again, the
+        actual internalNames of these attributes can be determined by
+        the deployer.  See the Examples section below for more details.
+
+    2.  Create a ProServer ini configuration File:  Each ProServer
+        instance can serve multiple DAS Sources from a single ini
+        configuration file.  These can consist of any sources
+        programmatically served by any SourceAdaptor plugin that the
+        server has installed.  A BioMart DAS Source Specification uses
+        the following template (note all attributes are required):
+
+; Name of the source in the URL for the request.
+[source_name]
+
+; Instruct the ProServer instance to make this source available.
+state          = on
+
+; Instruct the ProServer instance to use the biomart.pm SourceAdaptor.
+adaptor        = biomart
+
+; Provide the biomart source with a MartRegistry.xml configuration file.
+registryPath   = /pathTo/MartRegistry.xml
+
+; Instruct the BioMart source to use the following mart and dataset in
+; the above Registry file.
+mart           = name of mart
+dataset        = name of dataset
+
+; Instruct the BioMart source to use the Exportable-Importable pair with
+; the following linkName.
+linkName       = linkname
+
+; Map each attribute in the Exportable attributes list (in order) to its
+; corresponding DAS Feature hash key.  All DAS Exportables must define
+; 'id','type', and 'method' attributes.  They can also define 'start',
+; 'end', 'ori', 'phase','score', 'note', and 'link' attributes.
+feature_keys = id,type,method,not
+
+  3.    Start the ProServer:
+
+            /pathTo/ProServer/eg/proserver -c /pathTo/inifile.ini
+
+D.  Examples
+
+    1.  Simple Single Gene DAS compliant Source Dataset
+        specification: Mart myMart contains Dataset myDataset, which
+        contains:
+
+        -   Filters corresponding to chromosome, start coordinate,
+            and end coordinate, with internalNames myGenesChromosome,
+            myGenesStart, and myGenesEnd, respectively.
+
+        -   Attributes corresponding to gene ID, gene start,
+            gene end, gene type, gene annotation method, and
+            orientation, with internalNames myGenesId, myGenesStart,
+            myGenesEnd, myGenesType, myGenesMethod, myGenesOrientation,
+            respectively.
+
+        A.  Create the Importable with the following fields (the other
+            fields may be required, but are not formally specified in
+            the BioMart DAS specification, see the BioMart Documentation
+            for more details):
+
+            linkName : myGeneDasLink
+            filters  : myGenesChromosome,myGenesStart,myGenesEnd
+
+        B.  Create the Exportable with the following fields (same caveat
+            as in the Importable):
+
+            linkName   : myGeneDasLink
+            attributes : myGenesId,myGenesStart,myGenesEnd,myGenesType,myGenesMethod,myGenesOrientation
+
+        C.  Export the DatasetConfig.xml to the Mart Database.
+
+        D.  Create the ProServer ini-file somewhere on the file system
+            where the ProServer server can access it.  Create the
+            following entry (see the ProServer documentation for further
+            details of the ini-file requirements):
+
+[my_new_mart_gene_das]
+state          = on
+adaptor        = biomart
+registryPath   = /myHome/configs/myMartRegistry.xml
+mart           = myMart
+dataset        = myDataset
+linkName       = myGeneDasLink
+feature_keys   = id,start,end,type,method,ori
+
+
+    2.  Dataset serving a Gene DAS Source, and a Non-positional DAS
+        Source: Mart myMart, Dataset myDataset contains:
+
+        -   Filters corresponding to gene ID, chromosome, start
+            coordinate, and end coordinate, with internalNames
+            myGenesId, myGenesChromosome, myGenesStart, and myGenesEnd,
+            respectively.
+
+        -   Attributes corresponding to gene ID, gene start, gene
+            end, gene type, gene annotation method, orientation, and
+            mouse homologous gene ID with internalNames myGenesId,
+            myGenesStart, myGenesEnd, myGenesType, myGenesMethod,
+            myGenesOrientation, and myGenesMouseHomologId, respectively.
+
+        A.  Create the Gene DAS Importable with the following fields:
+
+            linkName : myGeneDasLink
+            filters  : myGenesChromosome,myGenesStart,myGenesEnd
+
+        B.  Create the Gene DAS Exportable with the following fields:
+
+            linkName   : myGeneDasLink
+            attributes : myGenesId,myGenesStart,myGenesEnd,myGenesType,myGenesMethod,myGenesOrientation
+
+        C.  Create the Non-positional DAS Importable with the following
+            fields:
+
+            linkName   : myNPDasLink
+            filters    : myGenesId
+
+        D.  Create the Non-positional DAS Exportable with the following
+            fields:
+
+            linkName   : myNPDasLink
+            attributes : myGenesId,myGenesType,myGenesMethod,myGenesMouseHomologId
+
+        E.  Export the DatasetCofig.xml to the Mart Database.
+
+        F.  Create the ProServer ini-file with the following two
+            entries:
+
+[my_new_mart_gene_das]
+state          = on
+adaptor        = biomart
+registryPath   = /myHome/configs/myMartRegistry.xml
+mart           = myMart
+dataset        = myDataset
+linkName       = myGeneDasLink
+feature_keys   = id,start,end,type,method,ori
+
+[my_new_mart_np_das]
+state          = on
+adaptor        = biomart
+
+; Note server can use the same MartRegistry.xml document, mart, or
+; dataset to configure multiple sources.
+registryPath   = /myHome/configs/myMartRegistry.xml
+mart           = myMart
+dataset        = myDataset
+
+linkName       = myNPDasLink
+
+; Note the lack of start and end, and the use of the 'note' field to
+; designate the mouse homologue ID.
+feature_keys   = id,type,method,note
+
+
+$Id: README,v 1.1.1.1 2006-11-22 20:31:00 arek Exp $

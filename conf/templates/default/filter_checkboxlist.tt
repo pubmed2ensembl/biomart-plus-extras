@@ -1,0 +1,61 @@
+[% # $Id: filter_checkboxlist.tt,v 1.2 2006-11-24 10:28:41 syed Exp $ %]
+
+[% #--------------------------------------------------------------------
+   # Macro for rendering a list of checkboxes as filter options. Options 
+   # can be either discrete values for a regular filter, or represent other 
+   # filters within a filter container.
+   #--------------------------------------------------------------------
+%]
+[% MACRO render_checkboxlist(filter, param_name) BLOCK %]
+
+[% USE Number.Format %]
+[% #couting checkboxes to split them into two columns %]
+[% cBox_count = 0 %]
+[% FOREACH option = filter.getAllOptions() %]
+	[% cBox_count = cBox_count + 1 %]
+[% END %]
+[% cBox_count_half =  cBox_count / 2 %]
+[% cBox_count_half =  cBox_count_half | round(0) %]
+
+[% cBox_count = 0 %]
+
+[% dataset_name = filter.pointedFromDataset || filter.dataSetName %]
+[% filtercollection_param_name = "${dataset_name}__filtercollection.${filter.filterCollection.name}" %]
+[% onchange_js = "checkFilterCollectionCheckbox('${filtercollection_param_name}');" %]
+<br/>
+	<div class="mart_attribute_col">
+
+	[% FOREACH option = filter.getAllOptions() %]
+		[% cBox_count = cBox_count + 1 %]
+		[% option_value = option.value() | replace('"','&quot;')  #" %]
+	  	[% option_displayname = option.displayName() | replace('"','&quot;') #" %]
+		[% IF cBox_count > cBox_count_half %]
+			[% cBox_count = 0 %]
+	</div>
+	<div class="mart_attribute_col">		
+		[% END %]
+	
+		<input type="checkbox" name="[% param_name %]" id = "[% option_displayname %]" value="[% option_value %]" 
+		onclick = "[% onchange_js %]"
+		
+			[* IF (session.param("[% param_name %]").defined() && session.param("[% param_name %]") != '')
+                  || ((session.param("[% param_name %]").size) && (session.param("[% param_name %]").size > 0) ) *]
+
+                        [* FOREACH filtervalue = session.param("[% param_name %]") *]
+                                [* IF filtervalue == "[% option_value  %]" *]
+                                        checked="checked"
+                                [* END *]
+                        [* END *]
+
+                [* END *]
+ 		/>
+	 	[% IF option.description %]
+  			<a title="[% option.description | replace('"','&quot;') %]">[% option_displayname %]</a>
+	  	[% ELSE %]
+  			[% option_displayname %]
+  		[% END %]<br/>
+	
+	[% END %]
+	</div>
+
+[% END # End macro %]

@@ -1,0 +1,294 @@
+[% # $Id: summarypanel.tt,v 1.10 2007-05-29 10:10:39 syed Exp $ %]
+[% USE Number.Format %]
+[% #PROCESS 'collapsible_section.tt' %]
+
+<!--
+<div style="text-align: center;">
+  <b>Query summary</b>
+</div>
+-->
+
+
+[% IF session.param('dataset').size() > 0 %]
+
+[% dataset_initial_hiddenstate = 'show' %]
+
+[% dset_count = 0 %]
+<input type="hidden" name="dataBase" value="[% sessionDBNAME %]" />
+
+
+[% FOREACH dset_name = session.param('dataset') %]
+<input type="hidden" name="dataset" value="[% dset_name %]" />
+
+[% dset_count = dset_count + 1 %]
+
+	[% IF dset_count == 2 %]
+		<div class="dummyLine_2"></div>
+	[% END %]
+
+
+[% dset = wq.get_mart_registry().getDatasetByName(session.param("schema"), dset_name) %]
+[% dset_displayname = dset.displayName() || dset_name %]
+
+<!--
+<img src="/martview/images/triangle_gray_small_right.png" alt="" />
+-->
+
+
+<table class="mart_summarypanel_listheaderTable" width="100%" border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed; margin: 16px 0px 0px 0px;">
+<tr>
+<td onclick="document.getElementById('${dset_name}__summarypanel_datasetbranch').onclick();"
+	onmouseover="setMouseOverStyle('${dset_name}__summarypanel_datasetbranch');"
+        onmouseout="setMouseOutStyle('${dset_name}__summarypanel_datasetbranch');">
+<span id="${dset_name}__summarypanel_datasetbranch" class="mart_summarypanel_listheader" 
+	
+	onclick="
+	resetResultsPanel();
+	showPanelHideSiblings('${dset_name}__infopanel'); 
+	setHighlightedSummaryPanelBranch(this.id);" 
+	onmouseover="setMouseOverStyle(this.id);" 
+	onmouseout="setMouseOutStyle(this.id);" 
+	title="Choose a main dataset to query">
+	Dataset
+
+	[% #### display count adjacent to DATASET TITLE %]
+	<span class="mart_summarypanel_dataset_entrycount" id="summarypanel_filter_count_[%dset_count%]">
+	 [% #### to be filled by ajaxcount via javascript except the case when we see the count for one dataset %]
+	 [% #### and then we add another dataset, we expect the count for first dataset to stay on screen %]
+	 [% #### the following code is just for the case stated %]
+
+		[% dset = wq.get_mart_registry().getDatasetByName(session.param("schema"), dset_name) %]
+		[% entry_label = dset.getConfigurationTree("default").entryLabel || 'Entries' %]
+		[% IF session.param('countButton') == 1 %]
+			[% dset_filter_count = 0 %]
+			[% dset_total_count = 0 %]
+			[% IF session.param('filtercount_of_dataset').$dset_name.defined() %]
+				[% dset_filter_count = session.param('filtercount_of_dataset').$dset_name | format_number %]
+			[% ELSE %]
+				[% dset_filter_count = session.param('entrycount_of_dataset').$dset_name | format_number %]
+			[% END %]
+			[% dset_total_count = session.param('entrycount_of_dataset').$dset_name | format_number %]
+			
+			[% dset_filter_count %] / [% dset_total_count %]  [% " $entry_label" %]
+		[% ELSE %]
+			[% IF dset_count == 1 %]
+				[% session.param('ds_1_count') %]
+			[% ELSE %]
+				[% session.param('ds_2_count') %]
+			[% END %]
+		[% END %]
+		
+	</span>
+</span>
+</td>
+</tr>
+</table> 
+
+[% render_collapse_controls_summaryPanel("dataset.${dset_name}__summary", "$dset_displayname", 'show' ) # dataset_initial_hiddenstate %]
+
+<!-- enabled filters list OPENS -->
+
+<div id="${dset_name}__filterlist">
+<!--
+<img src="/martview/images/triangle_gray_small_right.png" alt="" />
+-->
+
+<table class="mart_summarypanel_listheaderTable" width="100%" border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed;">
+<tr>
+<td onclick="document.getElementById('${dset_name}__summarypanel_filterbranch').onclick();"
+onmouseover="setAttFiltMouseOverStyle('${dset_name}__summarypanel_filterbranch');"
+        onmouseout="setAttFiltMouseOutStyle('${dset_name}__summarypanel_filterbranch');">
+<span class="mart_summarypanel_AttFiltHeader" id="${dset_name}__summarypanel_filterbranch"  
+	onclick="
+	resetResultsPanel();	
+	showPanelHideSiblings('${dset_name}__filterpanel'); setHighlightedSummaryPanelBranch(this.id);" 
+	onmouseover="setAttFiltMouseOverStyle(this.id);" 
+	onmouseout="setAttFiltMouseOutStyle(this.id);" 
+	title="Restrict your query by filtering">Filters </span>
+</td>
+</tr>
+</table>
+
+<!-- No actual content here, summary list gets populated entirely via Javascript -->
+[% IF dset_count == 1 %]
+<div  class="mart_summarypanel_listitem3">
+  [None selected]
+</div>
+[% ELSE %]
+<div  class="mart_summarypanel_listitem4">
+  [None selected]
+</div>
+[% END %]
+</div> 
+<!-- enabled filters list closes -->
+
+
+
+[% dataset_initial_hiddenstate = 'hide' IF dataset_initial_hiddenstate == 'show' %]
+
+[% # Figure out which att-tree is the default one %]
+[% default_attpage = '' %]
+[% FOREACH attributetree = dset.getConfigurationTree("default").getAllAttributeTrees() %]
+  [% NEXT IF attributetree.hideDisplay().defined && attributetree.hideDisplay == 'true' %]
+  [% default_attpage = attributetree.name %]
+  [% LAST %]
+[% END %]
+
+[% # Set up attribute-lists for later rendering via JScript %]
+
+<div>
+<!--
+<img src="/martview/images/triangle_gray_small_right.png" alt="" />
+-->
+<table class="mart_summarypanel_listheaderTable" width="100%" border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed;">
+<tr>
+<td onclick="document.getElementById('${dset_name}__summarypanel_attributebranch').onclick();" 
+	onmouseover="setAttFiltMouseOverStyle('${dset_name}__summarypanel_attributebranch');"
+        onmouseout="setAttFiltMouseOutStyle('${dset_name}__summarypanel_attributebranch');">
+<span class="mart_summarypanel_AttFiltHeader" id="${dset_name}__summarypanel_attributebranch" 
+	onclick="
+	resetResultsPanel();
+	showPanelHideSiblings('${dset_name}__attributepanel'); 
+	setHighlightedSummaryPanelBranch(this.id); 
+	var currentAttpage; 
+	var attPageRadios = document.getElementsByName('${dset_name}__attributepage'); 
+	for(var i=0;i<attPageRadios.length;i++) 
+	{ 
+		if(attPageRadios[i].checked)
+		{
+			currentAttpage = '${dset_name}__'+attPageRadios[i].value; 
+			break; 
+		}
+	} 
+	expandListCompactSiblings(currentAttpage+'__attributelist'); " 
+	onmouseover="setAttFiltMouseOverStyle(this.id);" 
+	onmouseout="setAttFiltMouseOutStyle(this.id);"
+	title="Choose data you want to view or save">
+	Attributes </span>
+</td>
+</tr>
+</table>
+
+[% #special case, dont display attribute tree name if there is only one. eg MSD %]
+[% attTreeCount = 0 %]
+[% FOREACH attributetree = dset.getConfigurationTree("default").getAllAttributeTrees() %]
+	[% NEXT IF attributetree.hideDisplay().defined && attributetree.hideDisplay == 'true' %]
+		[% attTreeCount = attTreeCount + 1 %]
+[% END %]
+
+[% FOREACH attributetree = dset.getConfigurationTree("default").getAllAttributeTrees() %]
+  [% NEXT IF attributetree.hideDisplay().defined && attributetree.hideDisplay == 'true' %]
+	<div id="${dset_name}__[% attributetree.name() %]__attributelist" style="display:none;">
+  	[% IF attTreeCount > 100 %]   <!-- TEMPORARY HACK AS AREK SAID. NO DEFAULTS reduce greater than 100 to 1 -->
+  	<span class="mart_summarypanel_listitem"  id="${dset_name}__summarypanel_attributebranch__[% attributetree.name %]">Page: [% attributetree.displayName() %]</span>
+	[% END %]
+
+	[% IF dset_count == 1 %]
+	<div  class="mart_summarypanel_listitem">
+	  [None selected]
+	</div>
+	[% ELSE %]
+	<div  class="mart_summarypanel_listitem2">
+	  [None selected]
+	</div>
+	[% END %]
+ 
+ <!-- No actual content here, summary list gets populated entirely via Javascript -->
+</div> <!-- enabled attributes list closes -->
+
+[% END # end foreach atttree for datset %]
+</div> <!-- attribute page list closes-->
+
+
+<!--
+[% IF session.param('filtercount_of_dataset').$dset_name.defined() %]
+<span class="mart_summarypanel_dataset_entrycount" id="${dset_name}__filtercount">
+ [% session.param('filtercount_of_dataset').$dset_name | format_number %] entries with filters applied
+</span>
+[% END %]
+-->
+
+
+</div> <!-- Collapsible dataset section closes -->
+
+
+[% END # datasets loop closes %]
+
+
+[% # TEMPORARY: only offer to add more datasets IF we have more than a certain number of datasets already in query. %]
+[% IF session.param("dataset").size() < 2 %]
+
+
+<!--
+<img src="/martview/images/triangle_gray_small_right.png" alt="" />
+-->
+	[% linked_dataset_count = wq.get_mart_registry.getDatasetsExportingTo(session.param("schema"),session.param("dataset").first) %]
+	<!-- LINK COUNT: [% linked_dataset_count.size() %] this doesnt work, keeps returning 1 for both one possible value and zero -->
+	[% linkdsCount = 0 %]
+	[% FOREACH linked_dataset_name = linked_dataset_count.sort %]
+  		[% linked_dataset = wq.get_mart_registry().getDatasetByName(session.param("schema"),linked_dataset_name) %]
+  		[% IF linked_dataset %]
+			[% linkdsCount = linkdsCount + 1 %]
+		[% END %]
+	[% END %]
+	<!-- LINK DS COUNT: [% linkdsCount %] this doesnt misbehave -->
+	
+	[% IF linkdsCount > 0 %]
+			<div class="dummyLine"></div>
+<table class="mart_summarypanel_listheaderTable" width="100%" border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed;">
+<tr>
+<td onclick="document.getElementById('show_linked_datasetpanel').onclick();"
+	onmouseover="setMouseOverStyle('show_linked_datasetpanel');"
+        onmouseout="setMouseOutStyle('show_linked_datasetpanel');">
+<span id="show_linked_datasetpanel" class="mart_summarypanel_listheader" 
+	onclick="
+	resetResultsPanel();
+	showPanelHideSiblings('add_linked_datasetpanel');
+	setHighlightedSummaryPanelBranch(this.id);
+	"
+	onmouseover="setMouseOverStyle(this.id);" 
+	onmouseout="setMouseOutStyle(this.id);" 
+	title="Optional second dataset to combine in queries">Dataset 
+</span> 
+
+</td>
+</tr>
+</table>
+
+<span class="mart_dataset_noneSelected">[None Selected]</span>
+	[% END %]
+[% END %]
+
+
+
+
+
+
+<!--
+	document.mainform['mart_mainpanel__current_visible_section'].value = 'resultspanel'; 
+	document.mainform['summarypanel__current_highlighted_branch'].value = 'show_results'; 
+-->
+
+
+
+
+<script language="JavaScript" type="text/javascript" >
+//<![CDATA[
+// Turn on the appropriate results-button, depending on whether we have results or not
+
+[% IF result_string.defined() && result_string != "" %]
+visibility('show_results', 'show');
+[% ELSE %]
+visibility('get_results', 'show');
+[% END %]
+
+
+//]]>
+</script>
+
+[% ELSE %]
+None selected
+[% END %]
+
+<br />
+

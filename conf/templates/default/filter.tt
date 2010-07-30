@@ -1,0 +1,140 @@
+[% # $Id: filter.tt,v 1.4 2007-05-05 16:01:17 syed Exp $ %]
+[% #--------------------------------------------------------------------
+   # Macro for rendering a filter as specified in the Mart-config. This
+   # may be an single, actual filter, or a container holding several
+   # filters which share a property and should be rendered as a list.
+   #--------------------------------------------------------------------
+%]
+
+[% # Load templates w/ macros to render various filter components %]
+[% PROCESS 'filter_text.tt'              %]
+[% PROCESS 'filter_selectmenu.tt'        %]
+[% PROCESS 'filter_radiobuttonlist.tt'   %]
+[% PROCESS 'filter_checkboxlist.tt'      %]
+[% PROCESS 'filteroption_pushactions.tt' %]
+
+[% MACRO render_filter(filter,filtercollection2show) BLOCK %]
+
+[% dataset_name = filter.pointedFromDataset || filter.dataSetName %]
+[% filter_paramname      = "${dataset_name}__filter.$filter.name"       %]
+
+<div class="mart_filter" id="[% filter_paramname %]__container">
+
+[% # A bit tricky: if there's just a single filter in the collection, display the filter-collection
+   # checkbox within the filter-section, and not outside as with multiple filters.
+%]
+
+<table cellpadding="0" border= "0" width="100%" style="table-layout: fixed;">
+<tr>	
+<td align="left" width="45%" valign="top">
+
+[% IF filtercollection2show %]
+<div class="mart_filtername" onmouseover="">
+  [% render_filtercollection_checkbox(filter, filtercollection2show) %]  
+  [% IF filtercollection.description %]
+  <a title="[% filtercollection.description | replace('"','&quot;') %]">$filtercollection.displayName</a>
+  [% ELSE %]
+  $filtercollection.displayName
+  [% END %]
+[% ELSE %]
+<div class="mart_filtername" onmouseover="" style="margin-left: 22px">
+
+  [% IF filter.description %]
+  <a title="[% filter.description | replace('"','&quot;') %]">$filter.displayName</a>
+  [% ELSE %]
+  $filter.displayName
+  [% END %]
+
+[% END %]
+
+  [% IF filter.displayType() == 'container' %]
+   [% # Image tag for radio or select group, which may or may not get populated. %]  
+   <br/>
+   <img name="[% filter_paramname %]__image" src="/martview/images/blank.gif" alt=""/>
+  [% ELSE %]
+   [% IF filter.imageURL.defined() %]
+     [% # Image tag for single filters only. %]
+     <img src="[% filter.imageURL() %]" alt=""/>
+   [% END %]
+  [% END %]	
+
+</div>
+
+</td>
+<td align="left" width="45%" valign="top">
+
+<div class="mart_filtervalue" id ="[% filter_paramname %]">
+
+[% # Figure out the nature of this filter %]
+[% SWITCH filter.displayType() %]
+	[% CASE 'container' %]
+		[% # The filter is actually a container of other filters. We'll take it on faith that 
+	     	# these filters are all the same in terms of multi vs single, text vs list etc., 
+	     	# (MartEditor to enforce this??) and only probe the first option for this information. %]
+	  	[% option_filters = filter.getAllOptions() %]
+	  	[% first_option = option_filters.0 %]
+
+	  	[% # Render the list in the specified style %]
+		<div style="float: left">
+
+  		[% render_selectmenu(filter, filter_paramname) %]
+
+	  	[% SWITCH first_option.filter().displayType() %]
+	
+			[% CASE 'list' %]
+		</div>
+		<div style="float: left">	
+	
+				[% IF first_option.filter().multipleValues() %]
+	    			[% render_checkboxlist(first_option, "${filter_paramname}__list", filter) %]
+    			[% ELSE %]
+      				[% render_radiobuttonlist(first_option, "${filter_paramname}__list", filter) %]
+				[% END %]
+	
+			[% CASE 'text' %]	
+		<br />
+				[% render_textfield(first_option, "${filter_paramname}__text", filter) %]
+	
+			[% CASE %]
+				[% IF first_option.filter().displayType() # Skips undef ones. %]
+					ERROR: option-filter displayType '[% first_option.filter().displayType() || '[undef]' %]' not valid
+				[% END %]
+		[% END %]
+		</div>
+
+	[% CASE 'list' %]
+  		[% # The filter has a list of discrete values user can choose from. The rendering
+	     # style can be either a regular select menu (drop-down or multi), or a list of
+     	# checkboxes/radiobuttons. %]
+     	
+		[% IF filter.style() == 'menu' && filter.graph != '1' %]
+			[% render_selectmenu(filter, filter_paramname) %]
+		[% ELSIF filter.style() == 'menu' && filter.graph == '1'   %] 
+			[% render_textfield(filter, filter_paramname) %]
+  		[% ELSE %]
+			[% IF filter.multipleValues() %]
+      			[% render_checkboxlist(filter, filter_paramname) %]
+    		[% ELSE %]
+				[% render_radiobuttonlist(filter, filter_paramname) %]
+			[% END %]
+		[% END %]
+
+	[% CASE 'text' %]
+  		[% # The filter is a plain text filter %]
+  		[% render_textfield(filter, filter_paramname) %]
+
+	[% CASE %]
+		[% IF filter.displayType() # Skips undef ones. %]
+			ERROR: filter displayType '[% filter.displayType() || '[undef]' %]' not valid
+		[% END %]
+	[% END %]
+
+</div>
+
+</td>
+</tr>
+</table>
+
+</div>
+
+[% END # End macro %]

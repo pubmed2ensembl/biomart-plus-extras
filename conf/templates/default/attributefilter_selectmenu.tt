@@ -1,0 +1,94 @@
+[% # $Id: attributefilter_selectmenu.tt,v 1.1 2007-10-01 14:57:00 ds5 Exp $ %]
+
+[% #--------------------------------------------------------------------
+   # Macro for rendering a select-menu with filter options. Options can
+   # be either discrete values for a regular filter, or other filters 
+   # within a filter container.
+   #--------------------------------------------------------------------
+%]
+[% MACRO render_selectmenu(filter, param_name, attrparam_name) BLOCK %]
+
+[% dataset_name = filter.pointedFromDataset || filter.dataSetName %]
+[% filtercollection_param_name = "${dataset_name}__filtercollection.${filter.filterCollection.name}" %]
+[% pushactionhash_name   = "${dataset_name}__pushActionsOfFiltermenu" %]
+[% sessionvaluehash_name = "${dataset_name}__sessionValueOfFiltermenu"  %]
+[% onchange_js_extraloop = '' %]
+[% IF filter.displayType() == 'container' %]
+  [% # Extra JS loop, needed for container filters, not the regular ones %]
+  [% onchange_js_extraloop = "
+for(var i=0; i<this.options.length; i++) {
+    removeFromSummaryPanelList('${dataset_name}__filterlist', '${dataset_name}__filter.'+this.options[i].value); };
+" %]
+[% END %]
+[% onchange_js = "
+addOnceTouchedParam('${param_name}__onceTouched');
+updateMenuPushactions(this, $pushactionhash_name, $sessionvaluehash_name);
+$onchange_js_extraloop
+checkAttributeCheckbox('${attrparam_name}');" %]
+[% IF filter.imageURL.defined() && filter.displayType() == 'container' %]
+[% onchange_js = onchange_js _ "
+document['${param_name}__image'].src='${filter.imageURL}';
+" %]
+[% END %]
+[% onchange_js = onchange_js.replace("\n", "") %]
+
+[* # At runtime, add entry to hash that keeps track of session values of pushaction-menus *]
+[* filter_parname = "$param_name" *]
+[* js_session_value_of_filtermenu.\$filter_parname
+      = session.param("[% param_name %]") || "[% filter.defaultValue() %]" *]
+
+[% # If parameter is available in session, set up lookup-hash here to speed up selected-status check in loop below %]
+[* filtervalues_lookup = {} *]
+[* IF    ( session.param("[% param_name %]").defined() 
+           && ( session.param("[% param_name %]") != '' ) )
+      || ( session.param("[% param_name %]").size() 
+           && ( session.param("[% param_name %]").size > 0 ) ) *]
+    
+  [* FOREACH filtervalue = session.param("[% param_name %]") *]
+    [*  filtervalues_lookup.\$filtervalue = 1 *]   
+  [* END *]
+  
+[* END *]
+
+
+<select name="$param_name" id="idTag__${filtercollection_param_name}"
+[%  IF filter.multipleValues %]
+	[% window_size = filter.getAllOptions().size() %]
+	[% window_size = window_size / 5 %]
+	[% IF window_size > 20 %]
+	    [% window_size = 20 %]
+	[% ELSIF filter.getAllOptions().size() < 5 %]
+	    [% window_size = filter.getAllOptions().size() %]
+	[% ELSIF window_size < 5%]
+	    [% window_size = 5 %]	
+        [% END %]
+	
+ multiple = "multiple"  size="${window_size}" 
+[%  END %]
+ onchange="[% onchange_js %]" >
+
+
+ [% IF filter.getAllOptions() && filter.getAllOptions().size > 0 %]
+
+[% FOREACH option = filter.getAllOptions() %]
+  [% # Gotta do some funky stuff here so quotes in strings don't mess up HTML or JavaScript %]
+  [% option_value = option.value() || option.name() %]
+  [% option_value_escaped = option_value | replace('"','&quot;')  #" %]
+  [% option_displayname = option.displayName() | replace('"','&quot;') #" %]
+
+	
+	<option value="[% option_value_escaped %]"
+
+>[% option_displayname || option_value_escaped %]</option>
+
+  [% # Process pushactions for this option, if any %]
+  [% process_pushactions(option, option_value, param_name, dataset_name) %]
+
+[% END %]
+
+[% ELSE %]
+	<option></option>
+[% END %]
+</select>
+
+[% END # End selectmenu macro %]

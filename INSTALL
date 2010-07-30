@@ -1,0 +1,28 @@
+-----------------------------------------------------------------
+Quick Install
+-----------------------------------------------------------------
+
+Before starting you'll need apache and mod_perl installed. You are 
+also advised to read the full installation instructions available on 
+www.biomart.org. 
+
+# configure biomart
+cd biomart-perl
+perl bin/configure.pl -r conf/exampleMartURLLocation.xml
+Follow the prompts, if you unsure what to answer hit return. 
+
+
+# run your standalone apache instance 
+cd biomart-perl
+[path to Apache]/bin/httpd -d $PWD
+(the path needs to be the same as chosen in step one of your configuration)
+
+Point your browser to http://localhost:5555
+(or change the port if you chosen a different option in the configuration step)
+
+
+If you are having problems or need more information consult the documentation
+available on www.biomart.org. You can also contant BioMart development team
+on mart-dev@ebi.ac.uk.
+
+

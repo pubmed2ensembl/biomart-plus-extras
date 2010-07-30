@@ -1,0 +1,20 @@
+<div class="mart_attributepanel">
+
+<!-- <span class="mart_attributepanel_title">ATTRIBUTES</span>-->
+<select name="[* param_prefix *]attributepage"  onchange="document.mainform.submit();">
+
+[% FOREACH attributetree = attributetrees %]
+[% NEXT IF attributetree.hideDisplay() == 'true' # show only non-hidden trees %]
+  <option value="[% attributetree.name %]"
+[* default_attributetree_name = "[% default_attributetree_name %]" *] 
+[* IF session.param("\${param_prefix}attributepage").defined() && session.param("\${param_prefix}attributepage") == "[% attributetree.name() %]" *]
+ selected="selected"
+[* ELSIF default_attributetree_name == "[% attributetree.name() %]" *]
+ selected="selected"
+[* END *]>[% attributetree.displayName %]</option>
+
+[% END %]
+</select>
+
+[% # Set default att-page to use, needed by outputpage.tt %]
+[* default_attributetree_name = "[% default_attributetree_name %]" *]

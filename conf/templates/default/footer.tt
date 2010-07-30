@@ -1,0 +1,6 @@
+
+<!-- $Id: footer.tt,v 1.5 2008-04-09 12:52:33 syed Exp $ -->
+
+<div id="mart_bottom_bar">
+         biomart version 0.7	
+</div>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MartRegistry>
+<MartRegistry>
+
+<virtualSchema name="default" default="1">
+<MartDBLocation
+                    name         = "mysqldb"
+                    displayName  = "mysqldb"
+                    databaseType = "mysql"
+                    host         = "172.22.70.89"
+                    port         = "3306"
+                    includeDatasets  = "a,b,c,das"
+                    database     = "api_test"
+                    schema       = "api_test"
+                    user         = "testing"
+                    password     = ""
+                    visible      = "1"
+/>
+<!--
+<MartDBLocation
+                    name         = "pgsqldb"
+                    displayName  = "pgsqldb"
+                    databaseType = "postgres"
+                    host         = "localhost"
+                    port         = "5432"
+                    includeDatasets  = "a,b,c,das"
+                    database     = "mbtest"
+                    schema       = "api_test"
+                    user         = "testing"
+                    password     = ""
+                    visible      = "1"
+/>
+<MartDBLocation
+                    name         = "oradb"
+                    displayName  = "oradb"
+                    databaseType = "oracle"
+                    host         = "localhost"
+                    port         = "1521"
+                    includeDatasets  = "a,b,c,das"
+                    database     = "XE"
+                    schema       = "api_test"
+                    user         = "api_test"
+                    password     = "api_test"
+                    visible      = "1"
+/>
+-->
+</virtualSchema>
+       
+</MartRegistry>

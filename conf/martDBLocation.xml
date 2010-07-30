@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MartRegistry>
+<MartRegistry>
+
+<MartDBLocation
+                    name         = "msd_mart_4"
+                    displayName  = "My BioMart Database"
+                    databaseType = "mysql"
+                    host         = "martdb.ebi.ac.uk"
+                    port         = "3306"
+                    database     = "msd_mart_4"
+                    schema       = "msd_mart_4"
+                    user         = "anonymous"
+                    password     = ""
+                    visible      = "1"
+                    default      = ""
+                    includeDatasets = ""
+                    martUser     = ""
+/>
+</MartRegistry>
+
+

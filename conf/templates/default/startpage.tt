@@ -1,0 +1,38 @@
+[% PROCESS 'header.tt' %]
+<!-- $Id: startpage.tt,v 1.1.1.1 2006-11-22 20:30:59 arek Exp $ -->
+
+<div id="mart_containerpanel">
+
+<form name="mainform" action="martview" method="post" enctype="multipart/form-data">
+
+<div id="mart_mainpanel">
+
+<div class="mart_main_menubar">
+
+<input type="hidden" name="interface_mode" value="[% session.param('interface_mode') %]" />
+[% PROCESS "wizard_menubar.tt" %]
+
+</div>
+
+<div style="text-align: right; padding: 4px;">
+<input type="hidden" name="current_stage" value="start" />
+<input type="hidden" name="next_stage"    value="filter" />
+<input type="image" name="submit.new"    src="/martview/images/new-on.gif"  value="New" onclick="document.mainform.next_stage.value = 'new'; document.mainform.submit();" />
+<input type="image" name="submit.filter" src="/martview/images/next-on.gif" value="Next" onclick="document.mainform.next_stage.value = 'filter'; document.mainform.submit();" />
+</div>
+
+[% PROCESS "datasetpanel.tt" %]
+
+</div> <!-- mainpanel closes -->
+
+<div id="mart_summarypanel">
+
+[% PROCESS "summarypanel.tt" %]
+
+</div> <!-- summary panel closes -->
+
+</form>
+
+</div> <!-- martpanel closes -->
+
+[% PROCESS 'footer.tt' %]

@@ -1,0 +1,113 @@
+[% # $Id: collapsible_section.tt,v 1.6 2007-05-23 16:25:14 syed Exp $ %]
+[% #--------------------------------------------------------------------
+   # FOR ALL SECTIONS EXCEPT SUMMARY PANEL
+   # Macro for rendering controls + start-tag for collapsible sections.
+   # Collapsible sections are used in several places in the Mart web
+   # interface, and so warrants its own generic macro functions.
+   #  Macros render static form-elements & Java-functioncalls, with current
+   # visibity state set according to session-stored parameters. Javascript
+   # functions take care of the rest, see header.tt and/or htdocs/js/ .
+   #--------------------------------------------------------------------
+%]
+
+[% MACRO render_collapse_controls(section_name, section_displayname, initial_state, section_description) BLOCK %]
+
+[% state_from_session = session.param("${section_name}__visibility") || initial_state || "hide" %]
+
+<!-- Collapse/expand controls  -->
+<input type="hidden" name="[% section_name %]__visibility" value="[% state_from_session %]" />
+<div id="[% section_name %]__show" class="
+[% IF state_from_session == "show" %]
+ctl_hidden_AttFiltPanel" style="display: none
+[% ELSE %]
+ctl_visible_AttFiltPanel
+[% END %]
+">
+  <span onclick="visibility('[% section_name %]','show');">
+    <img src="/[% TAG_path %]/mview/images/plus.png" alt="" />
+  </span>
+  <span style="display: inline">
+  [% IF section_description %]
+  <a title="[% section_description | replace('"','&quot;') %]">$section_displayname</a>
+  [% ELSE %]
+  $section_displayname
+  [% END %]
+  </span>
+</div>
+
+<div id="[% section_name %]__hide" class="
+[% IF state_from_session == "show" %]
+ctl_visible_AttFiltPanel
+[% ELSE %]
+ctl_hidden_AttFiltPanel" style="display: none 
+[% END %]
+">
+  <span onclick="visibility('[% section_name %]','hide');">
+    <img src="/[% TAG_path %]/mview/images/minus.png" alt="" />
+  </span>
+  <span style="display: inline">$section_displayname</span>
+</div>
+
+<!-- Start of collapsible section -->
+<div class="
+[% IF state_from_session == 'show' %]
+el_visible_AttFiltPanel
+[% ELSE %]
+el_hidden_AttFiltPanel" style="display: none
+[% END %]
+" id="$section_name" >
+
+[% END # End macro block %]
+
+
+
+[% #--------------------------------------------------------------------
+   # FOR SUMMARY PANEL ONLY
+   # Macro for rendering controls + start-tag for collapsible sections.
+   # Collapsible sections are used in several places in the Mart web
+   # interface, and so warrants its own generic macro functions.
+   #  Macros render static form-elements & Java-functioncalls, with current
+   # visibity state set according to session-stored parameters. Javascript
+   # functions take care of the rest, see header.tt and/or htdocs/js/ .
+   #--------------------------------------------------------------------
+%]
+
+
+[% MACRO render_collapse_controls_summaryPanel(section_name, section_displayname, initial_state, section_description) BLOCK %]
+
+[% state_from_session = session.param("${section_name}__visibility") || initial_state || "hide" %]
+
+<!-- Collapse/expand controls  -->
+<input type="hidden" name="[% section_name %]__visibility" value="[% state_from_session %]" />
+<div id="[% section_name %]__show">
+
+	<span class="
+	[% IF state_from_session == "show" %]
+		ctl_hidden" style="display: none
+	[% ELSE %]
+		ctl_visible" style="display: none
+	[% END %]
+  	">
+  	
+  [% IF section_description %]
+  <a title="[% section_description | replace('"','&quot;') %]"> $section_displayname</a>
+  [% ELSE %]
+  $section_displayname
+  [% END %]
+  </span>
+</div>
+
+<div id="[% section_name %]__hide" class="
+[% IF state_from_session == "show" %]
+ctl_visible" style="display: none
+[% ELSE %]
+ctl_hidden" style="display: none
+[% END %]
+">
+<span> $section_displayname</span>
+</div>
+
+<!-- Start of collapsible section -->
+<div id="$section_name" >
+
+[% END # End macro block %]
