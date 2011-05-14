@@ -55,17 +55,5 @@ For the pop-ups that occur on 'mouseover' events, we needed to include Walter Zo
 License
 -------
 
-BioMart 0.7 is released under the Lesser GNU General Public License, and
-we are continuing to adopt this license for BioMart Plus Extras 0.7.1.
-
-Copyright &copy; 2010, The University of Manchester
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the Lesser GNU General Public License as published 
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-[GNU Lesser General Public License](http://www.gnu.org/licenses/lgpl.html) for more details.
+BioMart 0.7 is released under the LGPL, and we are continuing to adopt this 
+license for BioMart Plus Extras 0.7.1 (see LICENSE).
