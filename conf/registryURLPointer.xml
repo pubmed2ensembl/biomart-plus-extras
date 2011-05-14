@@ -7,6 +7,6 @@
                     host         = "www.biomart.org"
                     port         = "80"
                     path         = ""
-                    includeMarts = "msd,uniprot"
+                    includeMarts = "ensembl"
 />
 </MartRegistry>
